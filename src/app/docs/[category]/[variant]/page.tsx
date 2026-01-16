@@ -2,6 +2,14 @@ import { getComponentBySlug, getAllComponents } from '@/lib/mdx';
 import { notFound } from 'next/navigation';
 import ComponentPageClient from './page-client';
 import React from 'react';
+import PreviewComponent from './preview-simple';
+
+interface ComponentPageProps {
+  params: Promise<{
+    category: string;
+    variant: string;
+  }>;
+}
 
 interface ComponentPageProps {
   params: Promise<{
@@ -37,6 +45,12 @@ export async function generateMetadata({ params }: ComponentPageProps) {
   };
 }
 
+function extractCode(content: string): string {
+  // 마크다운 코드 블록에서 코드만 추출 (첫 번째 코드 블록을 가져옵니다)
+  const match = content.match(/```(?:[\w-]+)?\s+([\s\S]*?)```/);
+  return match ? match[1].trim() : '// No code available';
+}
+
 export default async function ComponentPage({ params }: ComponentPageProps) {
   const { category, variant } = await params;
   const component = await getComponentBySlug(`${category}/${variant}`);
@@ -44,6 +58,11 @@ export default async function ComponentPage({ params }: ComponentPageProps) {
   if (!component) {
     notFound();
   }
+
+  // 메타데이터에 코드가 없으면 본문에서 추출하여 사용
+  const codeContent = component.metadata.code 
+    ? (component.metadata.code as string) 
+    : extractCode(component.content);
 
   return (
     <div className="space-y-12">
@@ -78,7 +97,7 @@ export default async function ComponentPage({ params }: ComponentPageProps) {
       </div>
 
       {/* Code Section */}
-      <ComponentPageClient content={component.content} code={component.metadata.code as string} />
+      <ComponentPageClient content={component.content} code={codeContent} />
 
       {/* Details Section */}
       <div className="space-y-6 pt-8 border-t border-zinc-800">
@@ -132,99 +151,4 @@ function DetailCard({ label, value }: { label: string; value: string }) {
       <p className="text-lg font-semibold text-zinc-50">{value}</p>
     </div>
   );
-}
-
-/* -------------------------------------------------------------------------- */
-/* Preview Logic Start                             */
-/* -------------------------------------------------------------------------- */
-
-// 1. 여기에 실제 렌더링될 컴포넌트들을 정의합니다.
-// (나중에는 별도 파일에서 import 해오는 것이 좋습니다)
-
-const PrimaryButton = () => (
-  <button className="px-4 py-2 bg-zinc-100 text-zinc-950 rounded-md font-medium hover:bg-zinc-200 transition-colors border border-zinc-100">
-    Primary Button
-  </button>
-);
-
-const GhostButton = () => (
-  <button className="px-4 py-2 text-zinc-300 rounded-md font-medium hover:bg-zinc-800 transition-colors border border-zinc-700">
-    Ghost Button
-  </button>
-);
-
-const NeumorphicButton = () => (
-  <button className="px-6 py-3 bg-zinc-900 text-zinc-100 rounded-2xl font-medium shadow-lg shadow-black/50 hover:shadow-xl transition-all hover:translate-y-0.5">
-    Neumorphic Button
-  </button>
-);
-
-const DefaultCard = () => (
-  <div className="p-6 rounded-lg border border-zinc-800 bg-zinc-900 max-w-sm w-full">
-    <h3 className="text-lg font-semibold text-zinc-50 mb-2">Card Title</h3>
-    <p className="text-zinc-400">This is a default card component with clean styling.</p>
-  </div>
-);
-
-const ElevatedCard = () => (
-  <div className="p-6 rounded-lg bg-zinc-900 shadow-xl shadow-black/50 max-w-sm w-full">
-    <h3 className="text-lg font-semibold text-zinc-50 mb-2">Elevated Card</h3>
-    <p className="text-zinc-400">This card has enhanced depth with shadow effects.</p>
-  </div>
-);
-
-const InputField = () => (
-  <input 
-    type="text" 
-    placeholder="Enter text..." 
-    className="px-4 py-2 bg-zinc-900 text-zinc-50 border border-zinc-800 rounded-md focus:border-zinc-600 focus:outline-none transition-colors w-full max-w-xs" 
-  />
-);
-
-const BasicModal = () => (
-  <div className="p-6 rounded-lg bg-zinc-900 border border-zinc-800 max-w-md w-full">
-    <h2 className="text-xl font-semibold text-zinc-50 mb-2">Modal Title</h2>
-    <p className="text-zinc-400 mb-4">This is a basic modal component preview.</p>
-    <button className="px-4 py-2 bg-zinc-100 text-zinc-950 rounded-md font-medium hover:bg-zinc-200 transition-colors">Close</button>
-  </div>
-);
-
-// 2. 정의한 컴포넌트를 slug(category/variant)와 매핑합니다.
-// 키 값은 실제 MDX 파일 경로(slug)와 정확히 일치해야 합니다.
-const COMPONENT_REGISTRY: Record<string, React.FC> = {
-  // Buttons
-  'button/primary': PrimaryButton, // 폴더명이 buttons라면 'buttons/primary'로 수정
-  'button/ghost': GhostButton,
-  'button/neumorphic': NeumorphicButton,
-  
-  // Cards
-  'card/default': DefaultCard,
-  'card/elevated': ElevatedCard,
-  
-  // Inputs
-  'input/text': InputField,
-  
-  // Modals
-  'modal/basic': BasicModal,
-};
-
-function PreviewComponent({ category, variant }: { category: string; variant: string }) {
-  const slug = `${category}/${variant}`;
-  const Component = COMPONENT_REGISTRY[slug];
-
-  if (!Component) {
-    return (
-      <div className="text-center">
-        <p className="text-zinc-400 mb-2">No preview found for:</p>
-        <code className="px-2 py-1 bg-zinc-900 border border-zinc-800 rounded text-zinc-300 text-sm">
-          {slug}
-        </code>
-        <p className="text-zinc-500 text-xs mt-4">
-          Check if the component is registered in <strong>COMPONENT_REGISTRY</strong>
-        </p>
-      </div>
-    );
-  }
-
-  return <Component />;
 }

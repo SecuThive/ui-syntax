@@ -70,7 +70,16 @@ export default function DocsLayout({
 
       {/* Desktop Sidebar - Fixed */}
       <div className="hidden md:flex md:w-64 flex-shrink-0 h-screen border-r border-zinc-800 sticky top-0">
-        <Sidebar items={sidebarItems} title="UI Syntax" />
+        {isLoading ? (
+          <div className="w-full flex flex-col items-center justify-center bg-zinc-950">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 rounded-full border-2 border-zinc-800 border-t-zinc-400 animate-spin" />
+              <p className="text-xs text-zinc-500">Loading...</p>
+            </div>
+          </div>
+        ) : (
+          <Sidebar items={sidebarItems} title="UI Syntax" />
+        )}
       </div>
 
       {/* Main Content Area */}

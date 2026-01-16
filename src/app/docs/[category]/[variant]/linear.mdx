@@ -1,0 +1,20 @@
+---
+title: Linear Loader
+description: A simple linear progress indicator used to show the status of an ongoing operation.
+category: loaders
+variant: linear
+code: |
+  <div className="w-64 space-y-2">
+    <div className="flex justify-between text-xs text-zinc-400">
+      <span>Uploading...</span>
+      <span>60%</span>
+    </div>
+    <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+      <div className="h-full bg-zinc-100 w-3/5 rounded-full"></div>
+    </div>
+  </div>
+---
+
+# Linear Loader
+
+Use this component to show the progress of a task.
