@@ -24,17 +24,26 @@ export default function ComponentPage() {
       setError(null);
       
       try {
-        const url = designId
-          ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://ui-syntax.vercel.app'}/api/designs/${designId}`
-          : `${process.env.NEXT_PUBLIC_SITE_URL || 'https://ui-syntax.vercel.app'}/api/designs/latest?category=${category}&variant=${variant}&status=published`;
+        let code = null;
         
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error('Failed to fetch design');
+        if (designId) {
+          // 특정 디자인 ID로 fetch
+          const response = await fetch(`/api/designs/${designId}`);
+          if (response.ok) {
+            const data = await response.json();
+            code = data.design?.code;
+          }
+        } else {
+          // 최신 published 디자인 fetch
+          const response = await fetch(`/api/designs?category=${category}&variant=${variant}&status=published`);
+          if (response.ok) {
+            const data = await response.json();
+            const designs = data.designs || [];
+            if (designs.length > 0) {
+              code = designs[0].code;
+            }
+          }
         }
-        
-        const data = await response.json();
-        const code = designId ? data.design?.code : data.code;
         
         if (!code) {
           throw new Error('No code available');
