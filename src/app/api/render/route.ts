@@ -50,18 +50,20 @@ export async function POST(request: NextRequest) {
     body { 
       display: flex; 
       justify-content: center; 
-      align-items: flex-start; 
-      padding: 16px 0; 
+      align-items: center; 
+      padding: 0; 
       background: transparent; 
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-      min-height: auto;
+      min-height: 200px;
     }
     #root { 
       display: flex; 
       justify-content: center; 
-      align-items: flex-start;
+      align-items: center;
       width: 100%;
+      padding: 16px;
     }
+    * { box-sizing: border-box; }
   </style>
 </head>
 <body>
@@ -90,23 +92,19 @@ export async function POST(request: NextRequest) {
     setTimeout(() => {
       const getContentHeight = () => {
         const root = document.getElementById('root');
-        if (!root) return 0;
-        return Math.ceil(root.getBoundingClientRect().height + 32);
+        if (!root) return 200;
+        const height = root.getBoundingClientRect().height;
+        return Math.max(Math.ceil(height), 200);
       };
       
       const observer = new ResizeObserver(() => {
         const height = getContentHeight();
-        if (height > 0) {
-          window.parent.postMessage({ type: 'resize', height }, '*');
-        }
+        window.parent.postMessage({ type: 'resize', height }, '*');
       });
       observer.observe(document.getElementById('root'));
       
       // 초기 높이 전송
-      const height = getContentHeight();
-      if (height > 0) {
-        window.parent.postMessage({ type: 'resize', height }, '*');
-      }
+      window.parent.postMessage({ type: 'resize', height: getContentHeight() }, '*');
     }, 150);
   } catch (e) {
     const errorMsg = e instanceof Error ? e.message : String(e);

@@ -69,13 +69,13 @@ export default function PreviewComponent({ category, variant }: PreviewProps) {
 function ComponentPreviewRenderer({ code }: { code: string }) {
   const [iframeHtml, setIframeHtml] = useState<string>('');
   const [renderError, setRenderError] = useState<string | null>(null);
-  const [iframeHeight, setIframeHeight] = useState<number>(300);
+  const [iframeHeight, setIframeHeight] = useState<number>(200);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'resize' && event.data?.height) {
-        // 최소 높이 250px, 패딩 포함해서 계산
-        setIframeHeight(Math.max(event.data.height, 250));
+        // 최소 높이 200px
+        setIframeHeight(Math.max(event.data.height, 200));
       }
     };
 
