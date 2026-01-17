@@ -46,17 +46,22 @@ COMPONENT_POOL = [
     ("skeleton", "text", "Skeleton Text"),
 ]
 
-PROMPT_TEMPLATE = """Create a beautiful {category} component ({variant} style) with:
-- Tailwind CSS styling
-- Smooth animations and hover effects
-- Modern design (glass morphism, gradients, shadows)
-- Clean React/TypeScript code
-- Accessibility support
+PROMPT_TEMPLATE = """Create a beautiful {category} component ({variant} style).
+
+REQUIREMENTS:
+- ONLY use Tailwind CSS (NO external libraries like framer-motion, react-icons, etc)
+- NO imports except 'import React from react'
+- NO CSS files, inline styles, or external dependencies
+- Pure JSX/TSX with inline Tailwind classes
+- Smooth animations using only CSS/Tailwind
+- Modern design with gradients, shadows, rounded corners
+- Accessibility support (aria labels, semantic HTML)
+- A creative and unique visual style
 
 CRITICAL: Respond with ONLY this JSON, no other text:
 {{
-  "designName": "Creative name (e.g., Glass Glow, Neon Gradient)",
-  "code": "```tsx\\n[component code]\\n```"
+  "designName": "Creative style name (e.g., Glass Glow, Neon Pulse, Aurora, Frost)",
+  "code": "export default function Component() {{ return (<>...</>); }}"
 }}"""
 
 def generate_code_with_ollama(category: str, variant: str) -> tuple[str, str]:

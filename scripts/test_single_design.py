@@ -46,16 +46,21 @@ except Exception as e:
 print(f"\n\nStep 2: Generating Code with Ollama...")
 print(f"  Component: {category}/{variant} ({base_name})")
 
-PROMPT = f"""Create a beautiful {category} component ({variant} style) with:
-- Tailwind CSS styling
-- Smooth animations and hover effects
-- Modern design
-- Clean React/TypeScript code
-- Accessibility support
+PROMPT = f"""Create a beautiful {category} component ({variant} style).
 
-CRITICAL: Respond with ONLY valid JSON, no other text or code blocks:
+REQUIREMENTS:
+- ONLY use Tailwind CSS (NO external libraries like framer-motion, react-icons, etc)
+- NO imports except 'import React from react'
+- NO CSS files, inline styles, or external dependencies
+- Pure JSX/TSX with inline Tailwind classes
+- Smooth animations using only CSS/Tailwind
+- Modern design with gradients, shadows, rounded corners
+- Accessibility support (aria labels, semantic HTML)
+- A creative and unique visual style
+
+CRITICAL: Respond with ONLY valid JSON, no other text:
 {{
-  "designName": "Creative name (e.g., Glass Glow, Neon)",
+  "designName": "Creative style name (e.g., Glass Glow, Neon Pulse, Aurora, Frost)",
   "code": "export default function {base_name.replace(' ', '')}() {{ ... }}"
 }}"""
 
