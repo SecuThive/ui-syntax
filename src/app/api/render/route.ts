@@ -46,9 +46,22 @@ export async function POST(request: NextRequest) {
   <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"><\/script>
   <script src="https://cdn.tailwindcss.com"><\/script>
   <style>
-    html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
-    body { display: flex; justify-content: center; align-items: flex-start; padding: 40px 20px; background: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
-    #root { display: flex; justify-content: center; align-items: center; }
+    html, body { margin: 0; padding: 0; width: 100%; }
+    body { 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      padding: 30px 16px; 
+      background: #0a0a0a; 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      min-height: auto;
+    }
+    #root { 
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -75,15 +88,29 @@ export async function POST(request: NextRequest) {
     
     // 높이 자동 조정을 위해 ResizeObserver 설정
     setTimeout(() => {
+      const getContentHeight = () => {
+        const root = document.getElementById('root');
+        if (!root) return 0;
+        const rect = root.getBoundingClientRect();
+        const computed = window.getComputedStyle(document.body);
+        const bodyPadding = parseFloat(computed.paddingTop) + parseFloat(computed.paddingBottom);
+        return Math.ceil(rect.height + bodyPadding);
+      };
+      
       const observer = new ResizeObserver(() => {
-        const height = document.body.scrollHeight;
-        window.parent.postMessage({ type: 'resize', height }, '*');
+        const height = getContentHeight();
+        if (height > 0) {
+          window.parent.postMessage({ type: 'resize', height }, '*');
+        }
       });
       observer.observe(document.getElementById('root'));
+      
       // 초기 높이 전송
-      const height = document.body.scrollHeight;
-      window.parent.postMessage({ type: 'resize', height }, '*');
-    }, 100);
+      const height = getContentHeight();
+      if (height > 0) {
+        window.parent.postMessage({ type: 'resize', height }, '*');
+      }
+    }, 150);
   } catch (e) {
     const errorMsg = e instanceof Error ? e.message : String(e);
     document.body.innerHTML = '<div style="color: #ff6b6b; padding: 20px; background: #2a2a2a; border-radius: 4px; border-left: 4px solid #ff6b6b; font-family: monospace; white-space: pre-wrap; max-width: 600px;"><strong>Render Error:</strong><br>' + errorMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';

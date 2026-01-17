@@ -74,7 +74,8 @@ function ComponentPreviewRenderer({ code }: { code: string }) {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'resize' && event.data?.height) {
-        setIframeHeight(Math.max(event.data.height + 20, 300));
+        // 최소 높이 250px, 패딩 포함해서 계산
+        setIframeHeight(Math.max(event.data.height, 250));
       }
     };
 
