@@ -56,6 +56,7 @@ def generate_code_with_ollama(category: str, variant: str) -> tuple[str, str]:
                 "prompt": prompt,
                 "stream": False,
                 "temperature": 0.5,
+                "format": "json",
             },
             timeout=300
         )
