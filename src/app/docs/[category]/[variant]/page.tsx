@@ -57,10 +57,32 @@ export default async function ComponentPage({ params, searchParams }: ComponentP
     notFound();
   }
 
-  // 1) Get code from database
-  let codeContent = await getLatestPublishedDesignCode(category, variant);
+  let codeContent = '';
+  let selectedDesignTitle = '';
+
+  // 1) If specific design is selected, fetch it
+  if (designId) {
+    try {
+      const designResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_SITE_URL || 'https://ui-syntax.vercel.app'}/api/designs/${designId}`,
+        { cache: 'no-store' }
+      );
+      if (designResponse.ok) {
+        const designData = await designResponse.json();
+        codeContent = designData.design?.code || '';
+        selectedDesignTitle = designData.design?.title || '';
+      }
+    } catch (error) {
+      console.error('Error fetching selected design:', error);
+    }
+  }
   
-  // 2) Fallback to MDX metadata or content
+  // 2) Fallback to latest design if not found
+  if (!codeContent) {
+    codeContent = await getLatestPublishedDesignCode(category, variant);
+  }
+  
+  // 3) Fallback to MDX metadata or content
   if (!codeContent) {
     codeContent = component.metadata.code 
       ? (component.metadata.code as string) 
@@ -104,7 +126,7 @@ export default async function ComponentPage({ params, searchParams }: ComponentP
       </div>
 
       {/* Code Section */}
-      <ComponentPageClient content={component.content} code={codeContent} />
+      <ComponentPageClient content={component.content} code={codeContent} category={category} variant={variant} />
 
       {/* Details & Information Section */}
       <div className="space-y-8 pt-8 border-t border-zinc-800">
