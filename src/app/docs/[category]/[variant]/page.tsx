@@ -79,7 +79,8 @@ export default async function ComponentPage({ params, searchParams }: ComponentP
   
   // 2) Fallback to latest design if not found
   if (!codeContent) {
-    codeContent = await getLatestPublishedDesignCode(category, variant);
+    const latestCode = await getLatestPublishedDesignCode(category, variant);
+    codeContent = latestCode || '';
   }
   
   // 3) Fallback to MDX metadata or content
