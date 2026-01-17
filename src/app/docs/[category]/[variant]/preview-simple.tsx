@@ -72,20 +72,29 @@ function ComponentPreviewRenderer({ code }: { code: string }) {
 
   useEffect(() => {
     try {
+      console.log('[Preview] Starting render with code:', code.substring(0, 100));
+      
       // 1. import 제거
       const codeWithoutImports = code
         .replace(/^import\s+[\s\S]*?from\s+['"][^'"]*['"]\s*;?\n*/gm, '')
         .trim();
+
+      console.log('[Preview] After removing imports:', codeWithoutImports.substring(0, 100));
 
       // 2. export default 제거
       const withoutExport = codeWithoutImports
         .replace(/export\s+default\s+/, '')
         .trim();
 
+      console.log('[Preview] After removing export:', withoutExport.substring(0, 100));
+
       // 3. 모든 선언된 함수/컴포넌트 이름 추출 (const X = ... 또는 function X)
       const constMatch = withoutExport.match(/const\s+(\w+)\s*=\s*\(?\)?/);
       const funcMatch = withoutExport.match(/function\s+(\w+)\s*\(/);
       const componentName = constMatch ? constMatch[1] : funcMatch ? funcMatch[1] : 'Component';
+
+      console.log('[Preview] Component name extracted:', componentName);
+      console.log('[Preview] Const match:', constMatch?.[1], 'Func match:', funcMatch?.[1]);
 
       // 4. Function() 내에서 코드를 실행하고 정의된 컴포넌트 찾아 반환
       const func = new Function('React', `
@@ -93,14 +102,20 @@ function ComponentPreviewRenderer({ code }: { code: string }) {
         return ${componentName};
       `);
 
+      console.log('[Preview] Function created, executing...');
       const component = func(React);
+      
+      console.log('[Preview] Component result:', component, 'is function?', typeof component === 'function');
+
       if (component && typeof component === 'function') {
         setComponent(() => component);
+        console.log('[Preview] Component set successfully');
       } else {
         setRenderError(`Component not a function`);
+        console.log('[Preview] Component is not a function');
       }
     } catch (err) {
-      console.error('Error rendering component:', err);
+      console.error('[Preview] Error rendering component:', err);
       setRenderError(`Error: ${err instanceof Error ? err.message : 'Unknown'}`);
     }
   }, [code]);
