@@ -50,14 +50,13 @@ export async function POST(request: NextRequest) {
       margin: 0; 
       padding: 0; 
       box-sizing: border-box; 
-      border: none !important;
-      outline: none !important;
     }
     html, body { 
       width: 100%; 
       height: auto;
       overflow: hidden;
-      background: transparent;
+      background: transparent !important;
+      border: none !important;
     }
     body { 
       display: flex; 
@@ -65,6 +64,14 @@ export async function POST(request: NextRequest) {
       align-items: center; 
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       padding: 24px;
+    }
+    #root,
+    #root > *,
+    div { 
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
     }
     #root { 
       display: inline-flex; 
