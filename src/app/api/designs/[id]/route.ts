@@ -37,3 +37,24 @@ export async function GET(
     );
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: RouteParams
+) {
+  try {
+    const { id } = await params;
+    
+    await prisma.design.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting design:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete design' },
+      { status: 500 }
+    );
+  }
+}
