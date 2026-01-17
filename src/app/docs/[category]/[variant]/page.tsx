@@ -85,9 +85,15 @@ export default async function ComponentPage({ params, searchParams }: ComponentP
   
   // 3) Fallback to MDX metadata or content
   if (!codeContent) {
-    codeContent = component.metadata.code 
-      ? (component.metadata.code as string) 
-      : extractCode(component.content);
+    if (component.metadata.code) {
+      codeContent = component.metadata.code as string;
+      console.log(`[ComponentPage] Using MDX metadata code for ${category}/${variant}: ${codeContent.length} chars`);
+    } else {
+      codeContent = extractCode(component.content);
+      console.log(`[ComponentPage] Using extracted MDX content code for ${category}/${variant}: ${codeContent.length} chars`);
+    }
+  } else {
+    console.log(`[ComponentPage] Using DB/design code for ${category}/${variant}: ${codeContent.length} chars`);
   }
 
   return (

@@ -27,6 +27,7 @@ export default function PreviewComponent({ category, variant }: PreviewProps) {
           if (response.ok) {
             const data = await response.json();
             fetchedCode = data.design?.code || '';
+            console.log(`[Preview] Loaded design code: ${fetchedCode.length} chars`);
           }
         } else {
           const response = await fetch(`/api/designs?category=${category}&variant=${variant}&status=published`);
@@ -35,6 +36,9 @@ export default function PreviewComponent({ category, variant }: PreviewProps) {
             const designs = data.designs || [];
             if (designs.length > 0) {
               fetchedCode = designs[0].code || '';
+              console.log(`[Preview] Loaded DB code for ${category}/${variant}: ${fetchedCode.length} chars`);
+            } else {
+              console.log(`[Preview] No DB design found for ${category}/${variant}`);
             }
           }
         }

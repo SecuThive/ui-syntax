@@ -6,7 +6,7 @@ interface RenderRequest {
 
 export async function POST(request: NextRequest) {
   try {
-    const { code } = (await request.json()) as RenderRequest;
+    let { code } = (await request.json()) as RenderRequest;
 
     if (!code) {
       return NextResponse.json(
@@ -14,6 +14,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // 0. 마크다운 코드블록 제거 (```tsx ... ```)
+    code = code.replace(/^```(?:tsx|jsx|javascript|js)?\s*/gm, '').replace(/\s*```$/gm, '').trim();
 
     // 1. import 제거
     const codeWithoutImports = code
@@ -34,6 +37,19 @@ export async function POST(request: NextRequest) {
     const constMatch = withoutExport.match(/const\s+(\w+)\s*=\s*\(?\)?/);
     const funcMatch = withoutExport.match(/function\s+(\w+)\s*\(/);
     const componentName = constMatch ? constMatch[1] : funcMatch ? funcMatch[1] : 'Component';
+
+    // 5. 컴포넌트가 함수가 아니면 (순수 JSX라면) 래핑
+    let finalCode = withoutExport;
+    
+    // JSX가 함수나 const 정의가 없으면 component로 래핑
+    if (!constMatch && !funcMatch && withoutExport.trim().startsWith('<')) {
+      finalCode = `const Component = () => {
+  return ${withoutExport};
+};`;
+    } else if (!constMatch && !funcMatch) {
+      // 어떤 형식도 아니면 그냥 Component로 사용
+      finalCode = `const Component = ${withoutExport};`;
+    }
 
     // iframe용 HTML 생성 - Babel을 사용하여 클라이언트에서 JSX 변환
     const html = `<!DOCTYPE html>
@@ -92,12 +108,8 @@ export async function POST(request: NextRequest) {
   }
   
   try {
-    ${withoutExport}
+    ${finalCode}
     
-    const Component = ${componentName};
-    if (typeof Component !== 'function') {
-      throw new Error('Component must be a function. Got: ' + typeof Component);
-    }
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<Component />);
     
