@@ -28,7 +28,14 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ design });
+    // Add category and variant from component for easier client access
+    const response = {
+      ...design,
+      category: design.component?.category,
+      variant: design.component?.variant,
+    };
+
+    return NextResponse.json({ design: response });
   } catch (error) {
     console.error('Error fetching design:', error);
     return NextResponse.json(

@@ -106,6 +106,7 @@ export async function GET(request: NextRequest) {
           where: { componentId: component.id, status },
           orderBy: { createdAt: 'desc' },
           take: limit,
+          include: { component: true },
         });
       } else if (category) {
         const components = await prisma.component.findMany({
@@ -117,17 +118,26 @@ export async function GET(request: NextRequest) {
           where: { componentId: { in: componentIds }, status },
           orderBy: { createdAt: 'desc' },
           take: limit,
+          include: { component: true },
         });
       } else {
         designs = await prisma.design.findMany({
           where: { status },
           orderBy: { createdAt: 'desc' },
           take: limit,
+          include: { component: true },
         });
       }
 
+      // Flatten component data into design objects for easier client access
+      const designsWithCategory = designs.map((design: any) => ({
+        ...design,
+        category: design.component?.category,
+        variant: design.component?.variant,
+      }));
+
       await prisma.$disconnect();
-      return NextResponse.json({ designs });
+      return NextResponse.json({ designs: designsWithCategory });
     } catch (prismaError: any) {
       return NextResponse.json(
         { error: 'Database connection failed', details: prismaError.message },
