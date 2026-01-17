@@ -35,45 +35,52 @@ export async function POST(request: NextRequest) {
     const funcMatch = withoutExport.match(/function\s+(\w+)\s*\(/);
     const componentName = constMatch ? constMatch[1] : funcMatch ? funcMatch[1] : 'Component';
 
-    console.log('[RenderAPI] Component name:', componentName);
-    console.log('[RenderAPI] Code:', withoutExport.substring(0, 150));
-
-    // iframe용 HTML 생성 - JSX 트랜스포일 불가능하므로
-    // 대신 Babel을 CDN에서 로드하여 클라이언트에서 실시간 변환
-    const html = `
-<!DOCTYPE html>
+    // iframe용 HTML 생성 - Babel을 사용하여 클라이언트에서 JSX 변환
+    const html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"><\/script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"><\/script>
+  <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"><\/script>
+  <script src="https://cdn.tailwindcss.com"><\/script>
   <style>
-    body { margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
+    body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: white; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
   </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="text/babel">
-    const React = window.React;
-    const ReactDOM = window.ReactDOM;
+(function renderComponent() {
+  // srcDoc에서는 DOMContentLoaded가 안 됨. 직접 실행
+  const React = window.React;
+  const ReactDOM = window.ReactDOM;
+  
+  if (!React || !ReactDOM) {
+    document.body.innerHTML = '<div style="color: red; padding: 20px; background: #ffe6e6; border-radius: 4px;">Error: React libraries not loaded</div>';
+    return;
+  }
+  
+  try {
+    ${withoutExport}
     
-    try {
-      ${withoutExport}
-      
-      const Component = ${componentName};
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(<Component />);
-    } catch (e) {
-      document.body.innerHTML = '<div style="color: red; padding: 20px;"><strong>Render Error:</strong><br>' + e.message + '</div>';
-      console.error(e);
+    const Component = ${componentName};
+    if (typeof Component !== 'function') {
+      throw new Error('Component must be a function. Got: ' + typeof Component);
     }
-  </script>
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<Component />);
+  } catch (e) {
+    const errorMsg = e instanceof Error ? e.message : String(e);
+    document.body.innerHTML = '<div style="color: #d32f2f; padding: 20px; background: #ffebee; border-radius: 4px; border-left: 4px solid #d32f2f; font-family: monospace; white-space: pre-wrap;"><strong>Render Error:</strong><br>' + errorMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+    console.error('Component render error:', e);
+  }
+})();
+  <\/script>
 </body>
-</html>
-    `;
+</html>`;
 
     return NextResponse.json({
       success: true,
