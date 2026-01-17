@@ -19,7 +19,12 @@ if not GOOGLE_API_KEY:
 
 # Configure Gemini
 genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel(MODEL_NAME)
+model = genai.GenerativeModel(
+    MODEL_NAME,
+    generation_config={
+        "response_mime_type": "application/json",
+    }
+)
 
 # All available component combinations
 COMPONENT_POOL = [
