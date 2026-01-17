@@ -1,193 +1,62 @@
-'use client';
-
-import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
-
 export default function Home() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  };
-
   return (
-    <motion.div
-      className="space-y-16"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Hero Section */}
-      <motion.div className="space-y-6" variants={itemVariants}>
-        <div className="space-y-2">
-          <h1 className="text-6xl md:text-7xl font-bold text-zinc-50 tracking-tight">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      {/* Navigation */}
+      <nav className="border-b border-slate-800 bg-slate-950/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             UI Syntax
           </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-zinc-400 to-zinc-600" />
+          <a 
+            href="/components" 
+            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition"
+          >
+            Components
+          </a>
         </div>
-        <p className="text-xl text-zinc-300 max-w-2xl leading-relaxed">
-          A comprehensive collection of beautifully designed UI components. Explore variants, preview in real-time, and copy code with a single click.
+      </nav>
+
+      {/* Hero Section */}
+      <div className="max-w-6xl mx-auto px-6 py-24 flex flex-col items-center justify-center min-h-[60vh]">
+        <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 text-center">
+          Beautiful UI Components
+        </h2>
+        <p className="text-xl text-slate-400 text-center mb-12 max-w-2xl">
+          A collection of modern, customizable React components with live previews and clean code examples.
         </p>
-        <div className="flex items-center gap-4 pt-4">
-          <Link href="/docs">
-            <motion.button
-              className="px-8 py-3 rounded-lg bg-zinc-100 text-zinc-950 font-semibold flex items-center gap-2 hover:bg-zinc-50 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Browse Components
-              <ArrowRight className="w-4 h-4" />
-            </motion.button>
-          </Link>
-          <button className="px-8 py-3 rounded-lg border border-zinc-700 text-zinc-300 font-semibold hover:bg-zinc-900/50 hover:border-zinc-600 transition-colors">
-            Learn More
-          </button>
-        </div>
-      </motion.div>
+        <a 
+          href="/components"
+          className="px-8 py-4 text-lg font-semibold rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition transform hover:scale-105"
+        >
+          Explore Components →
+        </a>
+      </div>
 
-      {/* Features Grid */}
-      <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-6" variants={itemVariants}>
-        {[
-          {
-            icon: '📦',
-            title: 'Organized Components',
-            desc: 'Browse curated UI components organized by category with multiple design variants.',
-          },
-          {
-            icon: '✨',
-            title: 'Live Previews',
-            desc: 'See real-time previews of components alongside syntax-highlighted source code.',
-          },
-          {
-            icon: '⚡',
-            title: 'Copy & Paste Ready',
-            desc: 'Copy component code instantly and integrate into your projects seamlessly.',
-          },
-        ].map((feature, i) => (
-          <motion.div
-            key={i}
-            className="p-6 rounded-lg border border-zinc-800/50 bg-gradient-to-br from-zinc-900/50 to-zinc-950/50 hover:border-zinc-700 transition-colors group"
-            variants={itemVariants}
-          >
-            <div className="w-12 h-12 rounded-lg bg-zinc-800/50 group-hover:bg-zinc-700/50 flex items-center justify-center mb-4 transition-colors text-lg">
-              {feature.icon}
-            </div>
-            <h3 className="text-lg font-semibold text-zinc-50 mb-2">{feature.title}</h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">{feature.desc}</p>
-          </motion.div>
-        ))}
-      </motion.div>
+      {/* Features */}
+      <div className="max-w-6xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div className="p-8 rounded-xl border border-slate-800 hover:border-blue-600/50 transition">
+          <div className="text-3xl mb-4">✨</div>
+          <h3 className="text-xl font-bold text-white mb-3">Modern Design</h3>
+          <p className="text-slate-400">Clean, contemporary components with smooth animations and interactions.</p>
+        </div>
+        <div className="p-8 rounded-xl border border-slate-800 hover:border-blue-600/50 transition">
+          <div className="text-3xl mb-4">⚡</div>
+          <h3 className="text-xl font-bold text-white mb-3">Live Preview</h3>
+          <p className="text-slate-400">See components in action with interactive live preview capabilities.</p>
+        </div>
+        <div className="p-8 rounded-xl border border-slate-800 hover:border-blue-600/50 transition">
+          <div className="text-3xl mb-4">📝</div>
+          <h3 className="text-xl font-bold text-white mb-3">Code Examples</h3>
+          <p className="text-slate-400">Copy-ready code snippets for every component variation.</p>
+        </div>
+      </div>
 
-      {/* Stats */}
-      <motion.div className="grid grid-cols-3 gap-6" variants={itemVariants}>
-        {[
-          { label: 'Components', value: '7+' },
-          { label: 'Variants', value: '15+' },
-          { label: 'Categories', value: '4' },
-        ].map((stat, i) => (
-          <motion.div
-            key={i}
-            className="text-center p-6 rounded-lg border border-zinc-800 bg-zinc-900/30"
-            variants={itemVariants}
-          >
-            <p className="text-3xl font-bold text-zinc-50 mb-1">{stat.value}</p>
-            <p className="text-sm text-zinc-400">{stat.label}</p>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* Getting Started Section */}
-      <motion.div className="space-y-6 p-8 rounded-lg border border-zinc-800 bg-gradient-to-br from-zinc-900/50 to-zinc-950" variants={itemVariants}>
-        <div>
-          <h2 className="text-3xl font-bold text-zinc-50 mb-2">How It Works</h2>
-          <p className="text-zinc-400">Navigate through components and customize to fit your design needs.</p>
+      {/* Footer */}
+      <footer className="border-t border-slate-800 bg-slate-950/50 py-8">
+        <div className="max-w-6xl mx-auto px-6 text-center text-slate-400">
+          <p>UI Syntax © 2026. Open source component library.</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[
-            { step: '1', title: 'Browse', desc: 'Start in the docs and explore component categories' },
-            { step: '2', title: 'Preview', desc: 'See live previews of different variants' },
-            { step: '3', title: 'Inspect', desc: 'Read the syntax-highlighted source code' },
-            { step: '4', title: 'Copy', desc: 'Copy and use in your own projects' },
-          ].map((item, i) => (
-            <motion.div key={i} className="flex gap-4" variants={itemVariants}>
-              <div className="flex-shrink-0">
-                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-zinc-800 text-zinc-50 font-semibold">
-                  {item.step}
-                </div>
-              </div>
-              <div>
-                <h4 className="font-semibold text-zinc-50 mb-1">{item.title}</h4>
-                <p className="text-sm text-zinc-400">{item.desc}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Tech Stack */}
-      <motion.div className="space-y-6" variants={itemVariants}>
-        <div>
-          <h2 className="text-3xl font-bold text-zinc-50 mb-2">Tech Stack</h2>
-          <p className="text-zinc-400">Built with modern technologies for performance and developer experience.</p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            'Next.js 16',
-            'TypeScript',
-            'Tailwind CSS 4',
-            'Framer Motion',
-            'Shiki',
-            'MDX',
-            'Lucide React',
-            'Gray Matter',
-          ].map((tech) => (
-            <motion.div
-              key={tech}
-              className="p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 text-center hover:border-zinc-700 transition-colors"
-              variants={itemVariants}
-              whileHover={{ scale: 1.05 }}
-            >
-              <p className="text-sm font-medium text-zinc-300">{tech}</p>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* CTA Section */}
-      <motion.div
-        className="relative p-12 rounded-lg border border-zinc-800 bg-gradient-to-r from-zinc-900/50 to-zinc-950/50 overflow-hidden"
-        variants={itemVariants}
-      >
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-gradient-to-r from-zinc-500 to-zinc-900" />
-        </div>
-        <div className="relative space-y-4 text-center">
-          <h3 className="text-2xl font-bold text-zinc-50">Ready to Get Started?</h3>
-          <p className="text-zinc-400 max-w-xl mx-auto">
-            Explore our component library and find the perfect UI elements for your next project.
-          </p>
-          <div className="pt-4">
-            <Link href="/docs">
-              <motion.button
-                className="px-8 py-3 rounded-lg bg-zinc-100 text-zinc-950 font-semibold flex items-center gap-2 mx-auto hover:bg-zinc-50 transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Explore Components
-                <ArrowRight className="w-4 h-4" />
-              </motion.button>
-            </Link>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
+      </footer>
+    </div>
   );
 }

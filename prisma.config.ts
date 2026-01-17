@@ -8,7 +8,10 @@ export default defineConfig({
   migrations: {
     path: "prisma/migrations",
   },
-  datasource: {
-    url: process.env["DATABASE_URL"],
+  datasources: {
+    db: {
+      provider: "sqlite",
+      url: process.env.DATABASE_URL,
+    },
   },
 });

@@ -1,0 +1,6 @@
+{
+  "/api/components/[category]/[name]/route": "app/api/components/[category]/[name]/route.js",
+  "/api/render/route": "app/api/render/route.js",
+  "/components/[category]/[name]/page": "app/components/[category]/[name]/page.js",
+  "/components/page": "app/components/page.js"
+}

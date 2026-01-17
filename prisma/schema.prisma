@@ -1,47 +1,18 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Component {
-  id          String   @id @default(cuid())
-  title       String
-  description String
+  id          Int     @id @default(autoincrement())
   category    String
-  variant     String
-  code        String   @db.Text
-  status      String   @default("active")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  designs     Design[]
-
-  @@unique([category, variant])
-  @@index([category])
-  @@index([status])
-}
-
-model Design {
-  id          String   @id @default(cuid())
-  componentId String
-  component   Component @relation(fields: [componentId], references: [id])
-  title       String
-  description String?
-  code        String   @db.Text
-  source      String   @default("gemini")
-  status      String   @default("draft")
-  version     Int      @default(1)
-  metadata    Json?
-  createdAt   DateTime @default(now())
-
-  @@index([componentId])
-  @@index([status])
+  name        String
+  description String
+  code        String
+  
+  @@unique([category, name], name: "category_name")
 }
