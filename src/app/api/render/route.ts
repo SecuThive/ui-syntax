@@ -56,7 +56,6 @@ export async function POST(request: NextRequest) {
       height: auto;
       overflow: hidden;
       background: transparent !important;
-      border: none !important;
     }
     body { 
       display: flex; 
@@ -65,18 +64,18 @@ export async function POST(request: NextRequest) {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       padding: 24px;
     }
-    #root,
-    #root > *,
-    div { 
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      outline: none !important;
-    }
     #root { 
       display: inline-flex; 
       justify-content: center; 
       align-items: center;
+      background: transparent !important;
+      border: none !important;
+    }
+    /* 컴포넌트는 제외하고 wrapper만 투명하게 */
+    #root > div:only-child {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
     }
   </style>
 </head>
