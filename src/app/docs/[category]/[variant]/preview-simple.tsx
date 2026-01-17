@@ -122,8 +122,8 @@ function ComponentPreviewRenderer({ code }: { code: string }) {
   return (
     <iframe
       srcDoc={iframeHtml}
-      className="w-full border border-zinc-700 rounded-lg"
-      style={{ height: `${iframeHeight}px`, background: '#0a0a0a', transition: 'height 0.2s ease' }}
+      className="w-full rounded-lg"
+      style={{ height: `${iframeHeight}px`, background: '#0a0a0a', border: '1px solid #333', transition: 'height 0.2s ease' }}
       sandbox="allow-scripts allow-same-origin allow-popups"
     />
   );

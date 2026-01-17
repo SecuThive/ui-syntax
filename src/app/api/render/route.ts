@@ -50,16 +50,16 @@ export async function POST(request: NextRequest) {
     body { 
       display: flex; 
       justify-content: center; 
-      align-items: center; 
-      padding: 30px 16px; 
-      background: #0a0a0a; 
+      align-items: flex-start; 
+      padding: 16px 0; 
+      background: transparent; 
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       min-height: auto;
     }
     #root { 
       display: flex; 
       justify-content: center; 
-      align-items: center;
+      align-items: flex-start;
       width: 100%;
     }
   </style>
@@ -91,10 +91,7 @@ export async function POST(request: NextRequest) {
       const getContentHeight = () => {
         const root = document.getElementById('root');
         if (!root) return 0;
-        const rect = root.getBoundingClientRect();
-        const computed = window.getComputedStyle(document.body);
-        const bodyPadding = parseFloat(computed.paddingTop) + parseFloat(computed.paddingBottom);
-        return Math.ceil(rect.height + bodyPadding);
+        return Math.ceil(root.getBoundingClientRect().height + 32);
       };
       
       const observer = new ResizeObserver(() => {
