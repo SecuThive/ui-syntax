@@ -46,7 +46,13 @@ export async function POST(request: NextRequest) {
   <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"><\/script>
   <script src="https://cdn.tailwindcss.com"><\/script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      border: none !important;
+      outline: none !important;
+    }
     html, body { 
       width: 100%; 
       height: auto;
