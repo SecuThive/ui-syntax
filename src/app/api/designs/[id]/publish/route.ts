@@ -19,7 +19,9 @@ export async function POST(
     try {
       // @ts-ignore - Prisma 7 export type issue
       const { PrismaClient } = require('@prisma/client');
-      const prisma = new PrismaClient();
+      const prisma = new PrismaClient({
+        datasources: { db: { url: process.env.DATABASE_URL } }
+      });
 
       // Find design
       const design = await prisma.design.findUnique({ where: { id } });

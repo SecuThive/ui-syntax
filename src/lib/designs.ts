@@ -10,7 +10,9 @@ export async function getLatestPublishedDesignCode(category: string, variant: st
 
     // @ts-ignore - Prisma 7 export type issue
     const { PrismaClient } = require('@prisma/client');
-    const prisma = new PrismaClient();
+    const prisma = new PrismaClient({
+      datasources: { db: { url: process.env.DATABASE_URL } }
+    });
 
     const component = await prisma.component.findUnique({
       where: { category_variant: { category, variant } },
