@@ -52,6 +52,7 @@ export async function getAllComponents(): Promise<ComponentDoc[]> {
               description: data.description || '',
               category: data.category || parentCategory,
               variant: data.variant,
+              code: data.code,
             },
             content,
             slug,
