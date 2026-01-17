@@ -1,8 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+
+// Prisma는 DATABASE_URL이 설정된 경우에만 초기화
+let prisma: any = null;
+
+async function getPrisma() {
+  if (!process.env.DATABASE_URL) {
+    return null;
+  }
+
+  if (!prisma) {
+    const { PrismaClient } = await import('@prisma/client');
+    prisma = new PrismaClient();
+  }
+
+  return prisma;
+}
 
 export async function POST(request: NextRequest) {
   try {
+    const prismaClient = await getPrisma();
+
+    if (!prismaClient) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
     const { title, description, category, variant, code } = body;
 
@@ -15,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 컴포넌트 생성 또는 업데이트
-    const component = await prisma.component.upsert({
+    const component = await prismaClient.component.upsert({
       where: {
         category_variant: {
           category,
@@ -53,17 +77,26 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    const prismaClient = await getPrisma();
+
+    if (!prismaClient) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 503 }
+      );
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get('category');
 
     let components;
     if (category) {
-      components = await prisma.component.findMany({
+      components = await prismaClient.component.findMany({
         where: { category, status: 'active' },
         orderBy: { createdAt: 'desc' },
       });
     } else {
-      components = await prisma.component.findMany({
+      components = await prismaClient.component.findMany({
         where: { status: 'active' },
         orderBy: { createdAt: 'desc' },
       });
