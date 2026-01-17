@@ -2,7 +2,7 @@ import { getComponentBySlug, getAllComponents } from '@/lib/mdx';
 import { getLatestPublishedDesignCode } from '@/lib/designs';
 import { notFound } from 'next/navigation';
 import ComponentPageClient from './page-client';
-import React from 'react';
+import React, { Suspense } from 'react';
 import PreviewComponent from './preview-simple';
 import DesignSelector from '@/components/DesignSelector';
 
@@ -122,7 +122,9 @@ export default async function ComponentPage({ params, searchParams }: ComponentP
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-zinc-50">Preview</h2>
         <div className="p-12 rounded-lg border border-zinc-800 bg-zinc-950 min-h-96 overflow-auto max-h-[500px] flex items-center justify-center">
-          <PreviewComponent category={category} variant={variant} />
+          <Suspense fallback={<div className="text-zinc-400">Loading preview...</div>}>
+            <PreviewComponent category={category} variant={variant} />
+          </Suspense>
         </div>
       </div>
 

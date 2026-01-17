@@ -16,33 +16,50 @@ export default function PreviewComponent({ category, variant }: PreviewProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('[Preview] Component mounted, category:', category, 'variant:', variant, 'designId:', designId);
+    
     const fetchCode = async () => {
       setLoading(true);
       setError(null);
       try {
         let fetchedCode = '';
+        let fetchUrl = '';
         
         if (designId) {
-          const response = await fetch(`/api/designs/${designId}`);
+          fetchUrl = `/api/designs/${designId}`;
+          console.log('[Preview] Fetching by ID:', fetchUrl);
+          const response = await fetch(fetchUrl);
+          console.log('[Preview] Response status:', response.status);
           if (response.ok) {
             const data = await response.json();
             fetchedCode = data.design?.code || '';
+            console.log('[Preview] Got code from ID, length:', fetchedCode.length);
+          } else {
+            console.log('[Preview] Response not ok:', await response.text());
           }
         } else {
-          const response = await fetch(`/api/designs?category=${category}&variant=${variant}&status=published`);
+          fetchUrl = `/api/designs?category=${category}&variant=${variant}&status=published`;
+          console.log('[Preview] Fetching by category/variant:', fetchUrl);
+          const response = await fetch(fetchUrl);
+          console.log('[Preview] Response status:', response.status);
           if (response.ok) {
             const data = await response.json();
             const designs = data.designs || [];
+            console.log('[Preview] Found designs:', designs.length);
             if (designs.length > 0) {
               fetchedCode = designs[0].code || '';
+              console.log('[Preview] Got code from list, length:', fetchedCode.length);
             }
+          } else {
+            console.log('[Preview] Response not ok:', await response.text());
           }
         }
         
+        console.log('[Preview] Setting code, length:', fetchedCode.length);
         setCode(fetchedCode);
       } catch (err) {
-        console.error('Error fetching code:', err);
-        setError('Failed to load component');
+        console.error('[Preview] Error fetching code:', err);
+        setError(`Failed to load: ${err instanceof Error ? err.message : 'unknown'}`);
       } finally {
         setLoading(false);
       }
@@ -50,6 +67,8 @@ export default function PreviewComponent({ category, variant }: PreviewProps) {
 
     fetchCode();
   }, [designId, category, variant]);
+
+  console.log('[Preview] Render state - loading:', loading, 'error:', error, 'code length:', code.length);
 
   if (loading) {
     return <div className="text-zinc-400">Loading preview...</div>;
@@ -60,78 +79,74 @@ export default function PreviewComponent({ category, variant }: PreviewProps) {
   }
 
   if (!code) {
-    return <div className="text-zinc-400">No preview available</div>;
+    return <div className="text-zinc-400">No preview available (no code)</div>;
   }
 
+  console.log('[Preview] Rendering ComponentPreviewRenderer');
   return <ComponentPreviewRenderer code={code} />;
 }
 
 function ComponentPreviewRenderer({ code }: { code: string }) {
-  const [Component, setComponent] = useState<React.ComponentType | null>(null);
+  const [iframeHtml, setIframeHtml] = useState<string>('');
   const [renderError, setRenderError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      console.log('[Preview] Starting render with code:', code.substring(0, 100));
-      
-      // 1. import 제거
-      const codeWithoutImports = code
-        .replace(/^import\s+[\s\S]*?from\s+['"][^'"]*['"]\s*;?\n*/gm, '')
-        .trim();
+    const renderComponent = async () => {
+      try {
+        console.log('[Preview] ComponentPreviewRenderer mounted, code length:', code.length);
+        console.log('[Preview] Sending code to render API');
+        console.log('[Preview] Code preview:', code.substring(0, 100));
+        
+        const response = await fetch('/api/render', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ code }),
+        });
 
-      console.log('[Preview] After removing imports:', codeWithoutImports.substring(0, 100));
+        console.log('[Preview] Render API response status:', response.status);
 
-      // 2. export default 제거
-      const withoutExport = codeWithoutImports
-        .replace(/export\s+default\s+/, '')
-        .trim();
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('[Preview] Render API error:', errorData);
+          setRenderError(`Render failed: ${errorData.error}`);
+          return;
+        }
 
-      console.log('[Preview] After removing export:', withoutExport.substring(0, 100));
-
-      // 3. 모든 선언된 함수/컴포넌트 이름 추출 (const X = ... 또는 function X)
-      const constMatch = withoutExport.match(/const\s+(\w+)\s*=\s*\(?\)?/);
-      const funcMatch = withoutExport.match(/function\s+(\w+)\s*\(/);
-      const componentName = constMatch ? constMatch[1] : funcMatch ? funcMatch[1] : 'Component';
-
-      console.log('[Preview] Component name extracted:', componentName);
-      console.log('[Preview] Const match:', constMatch?.[1], 'Func match:', funcMatch?.[1]);
-
-      // 4. Function() 내에서 코드를 실행하고 정의된 컴포넌트 찾아 반환
-      const func = new Function('React', `
-        ${withoutExport}
-        return ${componentName};
-      `);
-
-      console.log('[Preview] Function created, executing...');
-      const component = func(React);
-      
-      console.log('[Preview] Component result:', component, 'is function?', typeof component === 'function');
-
-      if (component && typeof component === 'function') {
-        setComponent(() => component);
-        console.log('[Preview] Component set successfully');
-      } else {
-        setRenderError(`Component not a function`);
-        console.log('[Preview] Component is not a function');
+        const data = await response.json();
+        console.log('[Preview] Render successful, HTML length:', data.html.length);
+        console.log('[Preview] HTML preview:', data.html.substring(0, 200));
+        setIframeHtml(data.html);
+        setRenderError(null);
+      } catch (err) {
+        console.error('[Preview] Error calling render API:', err);
+        setRenderError(`Error: ${err instanceof Error ? err.message : 'Unknown'}`);
       }
-    } catch (err) {
-      console.error('[Preview] Error rendering component:', err);
-      setRenderError(`Error: ${err instanceof Error ? err.message : 'Unknown'}`);
-    }
+    };
+
+    renderComponent();
   }, [code]);
+
+  console.log('[Preview] ComponentPreviewRenderer render - iframeHtml:', iframeHtml.length, 'renderError:', renderError);
 
   if (renderError) {
     return <div className="text-yellow-400 text-sm">{renderError}</div>;
   }
 
-  if (!Component) {
-    return <div className="text-zinc-400 text-sm">Rendering...</div>;
+  if (!iframeHtml) {
+    return <div className="text-zinc-400 text-sm">Rendering... (iframe HTML not set)</div>;
   }
 
-  try {
-    return <Component />;
-  } catch (err) {
-    console.error('Error during render:', err);
-    return <div className="text-red-400 text-sm">Render failed</div>;
-  }
+  return (
+    <iframe
+      srcDoc={iframeHtml}
+      className="w-full border border-zinc-700 rounded-lg bg-white"
+      style={{ minHeight: '400px' }}
+      sandbox={{
+        allowScripts: true,
+        allowSameOrigin: true,
+      } as any}
+    />
+  );
 }
