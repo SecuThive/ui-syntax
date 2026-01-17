@@ -37,7 +37,7 @@ jobs:
           exit 1
       - name: Pull Ollama model
         run: |
-          curl -X POST http://localhost:11434/api/pull -d '{"name": "llama2"}'
+          curl -X POST http://localhost:11434/api/pull -d '{"name": "mistral"}'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -46,7 +46,7 @@ jobs:
         env:
           API_BASE: ${{ secrets.API_BASE }}
           OLLAMA_BASE: http://localhost:11434
-          OLLAMA_MODEL: llama2
+          OLLAMA_MODEL: mistral
         run: |
           python scripts/daily_designs_ollama.py
 

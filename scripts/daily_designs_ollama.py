@@ -6,7 +6,7 @@ from datetime import datetime, UTC
 
 API_BASE = os.environ.get("API_BASE", "https://ui-syntax.vercel.app")
 OLLAMA_BASE = os.environ.get("OLLAMA_BASE", "http://localhost:11434")
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama2")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral")
 
 if not API_BASE:
     raise SystemExit("Missing env: API_BASE")
@@ -45,28 +45,18 @@ COMPONENT_POOL = [
     ("divider", "line", "Divider Line"),
 ]
 
-PROMPT_TEMPLATE = """
-Create an exceptionally beautiful and modern {category} component ({variant} style).
+PROMPT_TEMPLATE = """Create a beautiful {category} component ({variant} style) with:
+- Tailwind CSS styling
+- Smooth animations and hover effects
+- Modern design (glass morphism, gradients, shadows)
+- Clean React/TypeScript code
+- Accessibility support
 
-Requirements:
-- Use Tailwind CSS for styling with a stunning, professional design
-- Make it visually striking with thoughtful use of colors, shadows, and animations
-- Include smooth transitions and hover effects that delight users
-- Ensure accessibility (ARIA labels, keyboard navigation, semantic HTML)
-- Write clean, production-ready TypeScript/React code
-- Use modern design trends: glass morphism, subtle gradients, smooth shadows
-- Make it eye-catching enough that designers would want to use it immediately
-
-Focus on creating something truly beautiful that stands out. Think Dribbble-quality design.
-
-IMPORTANT: Your response MUST be in this exact JSON format:
+CRITICAL: Respond with ONLY this JSON, no other text:
 {{
-  "designName": "A creative 2-4 word design style name (e.g., 'Glass Morphism Glow', 'Neon Gradient', 'Minimal Shadow')",
-  "code": "```tsx\\n[your component code here]\\n```"
-}}
-
-Return ONLY this JSON object, nothing else.
-"""
+  "designName": "Creative name (e.g., Glass Glow, Neon Gradient)",
+  "code": "```tsx\\n[component code]\\n```"
+}}"""
 
 def generate_code_with_ollama(category: str, variant: str) -> tuple[str, str]:
     """Generate code using Ollama (running in Docker)"""
@@ -79,9 +69,9 @@ def generate_code_with_ollama(category: str, variant: str) -> tuple[str, str]:
                 "model": OLLAMA_MODEL,
                 "prompt": prompt,
                 "stream": False,
-                "temperature": 0.7,
+                "temperature": 0.5,
             },
-            timeout=120
+            timeout=300
         )
         response.raise_for_status()
         result = response.json().get("response", "")
