@@ -1,6 +1,5 @@
 import os
 import requests
-import random
 import json
 from datetime import datetime, UTC
 
@@ -11,37 +10,23 @@ OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral")
 if not API_BASE:
     raise SystemExit("Missing env: API_BASE")
 
-# Component pool - 실제 등록된 컴포넌트들만
 COMPONENT_POOL = [
-    # Button (3)
     ("button", "primary", "Primary Button"),
     ("button", "outlined", "Outlined Button"),
     ("button", "neumorphic", "Neumorphic Button"),
-    
-    # Card (2)
     ("card", "compact", "Compact Card"),
     ("card", "elevated", "Elevated Card"),
-    
-    # Input (3)
     ("input", "search", "Search Input"),
     ("input", "email", "Email Input"),
     ("input", "password", "Password Input"),
-    
-    # Badge (2)
     ("badge", "solid", "Solid Badge"),
     ("badge", "outline", "Outline Badge"),
-    
-    # Alert (3)
     ("alert", "success", "Success Alert"),
     ("alert", "warning", "Warning Alert"),
     ("alert", "error", "Error Alert"),
-    
-    # Loading (3)
     ("loading", "spinner", "Loading Spinner"),
     ("loading", "pulse", "Pulse Loader"),
     ("loading", "bar", "Progress Bar"),
-    
-    # Skeleton (2)
     ("skeleton", "card", "Skeleton Card"),
     ("skeleton", "text", "Skeleton Text"),
 ]
@@ -60,7 +45,7 @@ CRITICAL: Respond with ONLY this JSON, no other text:
 }}"""
 
 def generate_code_with_ollama(category: str, variant: str) -> tuple[str, str]:
-    """Generate code using Ollama (running in Docker)"""
+    """Generate code using Ollama"""
     prompt = PROMPT_TEMPLATE.format(category=category, variant=variant)
     
     try:
@@ -77,7 +62,6 @@ def generate_code_with_ollama(category: str, variant: str) -> tuple[str, str]:
         response.raise_for_status()
         result = response.json().get("response", "")
         
-        # Try to parse JSON response
         try:
             cleaned = result.strip()
             if cleaned.startswith("```json"):
@@ -100,70 +84,64 @@ def generate_code_with_ollama(category: str, variant: str) -> tuple[str, str]:
         raise
 
 def post_design(payload: dict):
-    """Create design in database"""
+    """Create design"""
     url = f"{API_BASE}/api/designs"
     r = requests.post(url, json=payload, timeout=30)
     r.raise_for_status()
     return r.json()
 
 def publish_design(design_id: str):
-    """Publish a design"""
+    """Publish design"""
     url = f"{API_BASE}/api/designs/{design_id}/publish"
     r = requests.post(url, timeout=30)
     r.raise_for_status()
     return r.json()
 
-def run_daily():
-    """Generate 3 random designs"""
-    selected = random.sample(COMPONENT_POOL, min(3, len(COMPONENT_POOL)))
+def main():
+    """Generate initial design for all components"""
+    print("🎨 Generating initial designs for all components...\n")
     created = []
     
-    for category, variant, base_name in selected:
-        print(f"\n🎨 Generating: {base_name}...")
+    for category, variant, base_name in COMPONENT_POOL:
+        print(f"🎨 Generating: {base_name}...", end=" ")
         try:
             design_name, code = generate_code_with_ollama(category, variant)
             if not code:
-                print(f"⚠️  Skipped {category}/{variant}: empty code output")
+                print(f"⚠️  Skipped: empty code")
                 continue
             
             timestamp = datetime.now(UTC)
             if design_name:
                 title = f"{base_name} - {design_name}"
             else:
-                title = f"{base_name} {timestamp.strftime('%Y%m%d-%H%M')}"
+                title = f"{base_name} {timestamp.strftime('%Y%m%d')}"
             
             payload = {
                 "title": title,
-                "description": f"✨ Auto-generated stunning {category}/{variant} design via Ollama on {timestamp.isoformat()}",
+                "description": f"✨ Initial design for {category}/{variant}",
                 "category": category,
                 "variant": variant,
                 "code": code,
                 "status": "draft",
-                "source": "ollama",
+                "source": "ollama-init",
                 "metadata": {"model": OLLAMA_MODEL, "design_theme": design_name or "auto"},
             }
             
             res = post_design(payload)
-            print(f"✅ Created: {title}")
-            
             design_id = res.get("design", {}).get("id")
             if design_id:
-                try:
-                    pub_res = publish_design(design_id)
-                    print(f"🚀 Published: {title}")
-                    created.append(pub_res)
-                except Exception as e:
-                    print(f"⚠️  Created but failed to publish {design_id}: {e}")
-                    created.append(res)
+                pub_res = publish_design(design_id)
+                print(f"✅ Created & Published")
+                created.append(res)
             else:
-                print("⚠️  No design ID returned")
+                print("⚠️  Created but no ID")
                 created.append(res)
                 
         except Exception as e:
             print(f"❌ Error: {e}")
     
-    print(f"\n🎉 Daily generation complete! Created {len(created)} designs.")
+    print(f"\n🎉 Initialization complete! Created {len(created)} designs.")
     return created
 
 if __name__ == "__main__":
-    run_daily()
+    main()
