@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
     // DATABASE_URL이 없으면 데이터베이스 미설정
     if (!process.env.DATABASE_URL) {
       return NextResponse.json(
-        { error: 'Database not configured. Set DATABASE_URL environment variable.' },
+        { error: 'Database not configured. Set DATABASE_URL environment variable in Vercel.' },
         { status: 503 }
       );
     }
@@ -21,10 +21,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 동적으로 Prisma Client 가져오기
+    // Prisma Client 동적 로드
     try {
-      const PrismaModule = await import('@prisma/client');
-      const { PrismaClient } = PrismaModule;
+      // @ts-ignore - Prisma 7 export type issue
+      const { PrismaClient } = require('@prisma/client');
       const prisma = new PrismaClient();
 
       // 컴포넌트 생성 또는 업데이트
@@ -58,11 +58,14 @@ export async function POST(request: NextRequest) {
         message: 'Component added/updated successfully',
       });
     } catch (prismaError: any) {
-      console.error('Prisma error:', prismaError);
-      throw prismaError;
+      console.error('Prisma initialization error:', prismaError.message);
+      return NextResponse.json(
+        { error: 'Database connection failed', details: prismaError.message },
+        { status: 500 }
+      );
     }
   } catch (error: any) {
-    console.error('Error adding component:', error);
+    console.error('Error adding component:', error.message);
     return NextResponse.json(
       { error: 'Failed to add component', details: error.message },
       { status: 500 }
@@ -75,14 +78,14 @@ export async function GET(request: NextRequest) {
     // DATABASE_URL이 없으면 데이터베이스 미설정
     if (!process.env.DATABASE_URL) {
       return NextResponse.json(
-        { error: 'Database not configured. Set DATABASE_URL environment variable.' },
+        { error: 'Database not configured' },
         { status: 503 }
       );
     }
 
     try {
-      const PrismaModule = await import('@prisma/client');
-      const { PrismaClient } = PrismaModule;
+      // @ts-ignore - Prisma 7 export type issue
+      const { PrismaClient } = require('@prisma/client');
       const prisma = new PrismaClient();
 
       const searchParams = request.nextUrl.searchParams;
@@ -105,11 +108,14 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({ components });
     } catch (prismaError: any) {
-      console.error('Prisma error:', prismaError);
-      throw prismaError;
+      console.error('Prisma initialization error:', prismaError.message);
+      return NextResponse.json(
+        { error: 'Database connection failed', details: prismaError.message },
+        { status: 500 }
+      );
     }
   } catch (error: any) {
-    console.error('Error fetching components:', error);
+    console.error('Error fetching components:', error.message);
     return NextResponse.json(
       { error: 'Failed to fetch components', details: error.message },
       { status: 500 }
