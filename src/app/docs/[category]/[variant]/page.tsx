@@ -4,18 +4,15 @@ import { notFound } from 'next/navigation';
 import ComponentPageClient from './page-client';
 import React from 'react';
 import PreviewComponent from './preview-simple';
+import DesignSelector from '@/components/DesignSelector';
 
 interface ComponentPageProps {
   params: Promise<{
     category: string;
     variant: string;
   }>;
-}
-
-interface ComponentPageProps {
-  params: Promise<{
-    category: string;
-    variant: string;
+  searchParams: Promise<{
+    design?: string;
   }>;
 }
 
@@ -52,21 +49,42 @@ function extractCode(content: string): string {
   return match ? match[1].trim() : '// No code available';
 }
 
-export default async function ComponentPage({ params }: ComponentPageProps) {
+async function getDesignCode(designId: string) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://ui-syntax.vercel.app'}/api/designs/${designId}`, {
+    cache: 'no-store'
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.design?.code || null;
+}
+
+export default async function ComponentPage({ params, searchParams }: ComponentPageProps) {
   const { category, variant } = await params;
+  const { design: designId } = await searchParams;
   const component = await getComponentBySlug(`${category}/${variant}`);
 
   if (!component) {
     notFound();
   }
 
-  // 1) DB 공개 디자인 코드가 있으면 우선 사용
-  const dbCode = await getLatestPublishedDesignCode(category, variant);
-  // 2) 메타데이터에 코드가 있으면 사용, 없으면 본문에서 추출
-  const fallbackCode = component.metadata.code 
-    ? (component.metadata.code as string) 
-    : extractCode(component.content);
-  const codeContent = dbCode ?? fallbackCode;
+  // 1) 선택된 디자인 ID가 있으면 해당 디자인 코드 사용
+  let codeContent = null;
+  if (designId) {
+    codeContent = await getDesignCode(designId);
+  }
+  
+  // 2) 선택된 디자인이 없거나 실패하면 최신 DB 공개 디자인 코드 사용
+  if (!codeContent) {
+    codeContent = await getLatestPublishedDesignCode(category, variant);
+  }
+  
+  // 3) DB에도 없으면 메타데이터 또는 본문에서 추출
+  if (!codeContent) {
+    const fallbackCode = component.metadata.code 
+      ? (component.metadata.code as string) 
+      : extractCode(component.content);
+    codeContent = fallbackCode;
+  }
 
   return (
     <div className="space-y-12">
@@ -85,10 +103,15 @@ export default async function ComponentPage({ params }: ComponentPageProps) {
 
       {/* Header */}
       <div className="space-y-3">
-        <h1 className="text-5xl font-bold text-zinc-50">{component.metadata.title}</h1>
-        {component.metadata.description && (
-          <p className="text-lg text-zinc-400 max-w-2xl">{component.metadata.description}</p>
-        )}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-5xl font-bold text-zinc-50">{component.metadata.title}</h1>
+            {component.metadata.description && (
+              <p className="text-lg text-zinc-400 max-w-2xl mt-3">{component.metadata.description}</p>
+            )}
+          </div>
+          <DesignSelector category={category} variant={variant} />
+        </div>
       </div>
 
       {/* Live Preview Section */}

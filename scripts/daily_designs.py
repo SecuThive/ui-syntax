@@ -69,14 +69,42 @@ Requirements:
 
 Focus on creating something truly beautiful that stands out. Think Dribbble-quality design.
 
-Return ONLY the code block with ```tsx wrapper (no explanations, no markdown outside the code block).
+IMPORTANT: Your response MUST be in this exact JSON format:
+{{
+  "designName": "A creative 2-4 word design style name (e.g., 'Glass Morphism Glow', 'Neon Gradient', 'Minimal Shadow')",
+  "code": "```tsx\\n[your component code here]\\n```"
+}}
+
+Return ONLY this JSON object, nothing else.
 """
 
-def generate_code(category: str, variant: str) -> str:
+def generate_code(category: str, variant: str) -> tuple[str, str]:
+    """Generate code and design name from Gemini"""
     prompt = PROMPT_TEMPLATE.format(category=category, variant=variant)
     resp = model.generate_content(prompt)
-    code = resp.text or ""
-    return code.strip()
+    result = resp.text or ""
+    
+    # Try to parse JSON response
+    try:
+        import json
+        # Clean up response (remove markdown code blocks if present)
+        cleaned = result.strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:]
+        if cleaned.startswith("```"):
+            cleaned = cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+        cleaned = cleaned.strip()
+        
+        data = json.loads(cleaned)
+        design_name = data.get("designName", "").strip()
+        code = data.get("code", "").strip()
+        return design_name, code
+    except Exception as e:
+        print(f"⚠️  JSON parse failed, using fallback: {e}")
+        # Fallback: treat entire response as code
+        return "", result.strip()
 
 def post_design(payload: dict):
     url = f"{API_BASE}/api/designs"
@@ -100,13 +128,17 @@ def run_daily():
     
     for category, variant, base_name in selected:
         print(f"\n🎨 Generating: {base_name}...")
-        code = generate_code(category, variant)
+        design_name, code = generate_code(category, variant)
         if not code:
             print(f"⚠️  Skipped {category}/{variant}: empty code output")
             continue
-            
+        
+        # Use creative design name if available, otherwise use base name with timestamp
         timestamp = datetime.now(UTC)
-        title = f"{base_name} {timestamp.strftime('%Y%m%d-%H%M')}"
+        if design_name:
+            title = f"{base_name} - {design_name}"
+        else:
+            title = f"{base_name} {timestamp.strftime('%Y%m%d-%H%M')}"
         
         payload = {
             "title": title,
@@ -116,7 +148,7 @@ def run_daily():
             "code": code,
             "status": "draft",
             "source": "gemini",
-            "metadata": {"model": MODEL_NAME, "design_theme": "modern-beautiful"},
+            "metadata": {"model": MODEL_NAME, "design_theme": design_name or "auto"},
         }
         try:
             res = post_design(payload)
