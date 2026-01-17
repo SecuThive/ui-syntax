@@ -49,8 +49,9 @@ print(f"  Component: {category}/{variant} ({base_name})")
 PROMPT = f"""Create a beautiful {category} component ({variant} style).
 
 REQUIREMENTS:
+- Include 'import React from "react";' at the top
 - ONLY use Tailwind CSS (NO external libraries like framer-motion, react-icons, etc)
-- NO imports except 'import React from react'
+- NO other imports except React
 - NO CSS files, inline styles, or external dependencies
 - Pure JSX/TSX with inline Tailwind classes
 - Smooth animations using only CSS/Tailwind
@@ -58,10 +59,10 @@ REQUIREMENTS:
 - Accessibility support (aria labels, semantic HTML)
 - A creative and unique visual style
 
-CRITICAL: Respond with ONLY valid JSON, no other text:
+FORMAT REQUIREMENT - Return ONLY this JSON structure, no other text:
 {{
   "designName": "Creative style name (e.g., Glass Glow, Neon Pulse, Aurora, Frost)",
-  "code": "export default function {base_name.replace(' ', '')}() {{ ... }}"
+  "code": "import React from \\"react\\";\\n\\nexport default function {base_name.replace(' ', '')}() {{\\n  return (\\n    ...your JSX here...\\n  );\\n}}"
 }}"""
 
 try:

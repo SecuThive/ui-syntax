@@ -72,24 +72,36 @@ function ComponentPreviewRenderer({ code }: { code: string }) {
 
   useEffect(() => {
     try {
+      // 1. import 제거
       const codeWithoutImports = code
         .replace(/^import\s+[\s\S]*?from\s+['"][^'"]*['"]\s*;?\n*/gm, '')
         .trim();
 
+      // 2. export default 제거
+      const withoutExport = codeWithoutImports
+        .replace(/export\s+default\s+/, '')
+        .trim();
+
+      // 3. 모든 선언된 함수/컴포넌트 이름 추출 (const X = ... 또는 function X)
+      const constMatch = withoutExport.match(/const\s+(\w+)\s*=\s*\(?\)?/);
+      const funcMatch = withoutExport.match(/function\s+(\w+)\s*\(/);
+      const componentName = constMatch ? constMatch[1] : funcMatch ? funcMatch[1] : 'Component';
+
+      // 4. Function() 내에서 코드를 실행하고 정의된 컴포넌트 찾아 반환
       const func = new Function('React', `
-        ${codeWithoutImports}
-        return PrimaryButton || Component || (() => null);
+        ${withoutExport}
+        return ${componentName};
       `);
 
       const component = func(React);
       if (component && typeof component === 'function') {
         setComponent(() => component);
       } else {
-        setRenderError('Component export not found');
+        setRenderError(`Component not a function`);
       }
     } catch (err) {
       console.error('Error rendering component:', err);
-      setRenderError('Failed to render');
+      setRenderError(`Error: ${err instanceof Error ? err.message : 'Unknown'}`);
     }
   }, [code]);
 
