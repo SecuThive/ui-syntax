@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(
   request: NextRequest,
@@ -17,9 +18,9 @@ export async function POST(
     const { title, description } = body || {};
 
     try {
-      // @ts-ignore - Prisma 7 export type issue
-      const { PrismaClient } = require('@prisma/client');
-      const prisma = new PrismaClient();
+      if (!prisma) {
+        throw new Error('Prisma client not initialized');
+      }
 
       // Find design
       const design = await prisma.design.findUnique({ where: { id } });

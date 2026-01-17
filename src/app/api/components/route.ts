@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,9 +24,9 @@ export async function POST(request: NextRequest) {
 
     // Prisma Client 동적 로드
     try {
-      // @ts-ignore - Prisma 7 export type issue
-      const { PrismaClient } = require('@prisma/client');
-      const prisma = new PrismaClient();
+      if (!prisma) {
+        throw new Error('Prisma client not initialized');
+      }
 
       // 컴포넌트 생성 또는 업데이트
       const component = await prisma.component.upsert({
@@ -84,9 +85,9 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      // @ts-ignore - Prisma 7 export type issue
-      const { PrismaClient } = require('@prisma/client');
-      const prisma = new PrismaClient();
+      if (!prisma) {
+        throw new Error('Prisma client not initialized');
+      }
 
       const searchParams = request.nextUrl.searchParams;
       const category = searchParams.get('category');
