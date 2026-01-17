@@ -9,8 +9,8 @@ async function getPrisma() {
   }
 
   if (!prisma) {
-    const { PrismaClient } = await import('@prisma/client');
-    prisma = new PrismaClient();
+    const { PrismaClient: PC } = await import('@prisma/client');
+    prisma = new PC();
   }
 
   return prisma;
