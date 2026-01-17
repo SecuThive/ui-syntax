@@ -72,6 +72,18 @@ export async function POST(request: NextRequest) {
     }
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<Component />);
+    
+    // 높이 자동 조정을 위해 ResizeObserver 설정
+    setTimeout(() => {
+      const observer = new ResizeObserver(() => {
+        const height = document.body.scrollHeight;
+        window.parent.postMessage({ type: 'resize', height }, '*');
+      });
+      observer.observe(document.getElementById('root'));
+      // 초기 높이 전송
+      const height = document.body.scrollHeight;
+      window.parent.postMessage({ type: 'resize', height }, '*');
+    }, 100);
   } catch (e) {
     const errorMsg = e instanceof Error ? e.message : String(e);
     document.body.innerHTML = '<div style="color: #ff6b6b; padding: 20px; background: #2a2a2a; border-radius: 4px; border-left: 4px solid #ff6b6b; font-family: monospace; white-space: pre-wrap; max-width: 600px;"><strong>Render Error:</strong><br>' + errorMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';

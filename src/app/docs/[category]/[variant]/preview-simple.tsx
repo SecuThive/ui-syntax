@@ -69,6 +69,18 @@ export default function PreviewComponent({ category, variant }: PreviewProps) {
 function ComponentPreviewRenderer({ code }: { code: string }) {
   const [iframeHtml, setIframeHtml] = useState<string>('');
   const [renderError, setRenderError] = useState<string | null>(null);
+  const [iframeHeight, setIframeHeight] = useState<number>(300);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'resize' && event.data?.height) {
+        setIframeHeight(Math.max(event.data.height + 20, 300));
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   useEffect(() => {
     const renderComponent = async () => {
@@ -110,7 +122,7 @@ function ComponentPreviewRenderer({ code }: { code: string }) {
     <iframe
       srcDoc={iframeHtml}
       className="w-full border border-zinc-700 rounded-lg"
-      style={{ minHeight: '500px', background: '#0a0a0a' }}
+      style={{ height: `${iframeHeight}px`, background: '#0a0a0a', transition: 'height 0.2s ease' }}
       sandbox="allow-scripts allow-same-origin allow-popups"
     />
   );
