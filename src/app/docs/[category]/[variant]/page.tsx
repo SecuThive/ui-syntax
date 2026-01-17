@@ -1,4 +1,5 @@
 import { getComponentBySlug, getAllComponents } from '@/lib/mdx';
+import { getLatestPublishedDesignCode } from '@/lib/designs';
 import { notFound } from 'next/navigation';
 import ComponentPageClient from './page-client';
 import React from 'react';
@@ -59,10 +60,13 @@ export default async function ComponentPage({ params }: ComponentPageProps) {
     notFound();
   }
 
-  // 메타데이터에 코드가 없으면 본문에서 추출하여 사용
-  const codeContent = component.metadata.code 
+  // 1) DB 공개 디자인 코드가 있으면 우선 사용
+  const dbCode = await getLatestPublishedDesignCode(category, variant);
+  // 2) 메타데이터에 코드가 있으면 사용, 없으면 본문에서 추출
+  const fallbackCode = component.metadata.code 
     ? (component.metadata.code as string) 
     : extractCode(component.content);
+  const codeContent = dbCode ?? fallbackCode;
 
   return (
     <div className="space-y-12">

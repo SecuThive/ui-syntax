@@ -22,8 +22,26 @@ model Component {
   status      String   @default("active")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  designs     Design[]
 
   @@unique([category, variant])
   @@index([category])
+  @@index([status])
+}
+
+model Design {
+  id          String   @id @default(cuid())
+  componentId String
+  component   Component @relation(fields: [componentId], references: [id])
+  title       String
+  description String?
+  code        String   @db.Text
+  source      String   @default("gemini")
+  status      String   @default("draft")
+  version     Int      @default(1)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([componentId])
   @@index([status])
 }
