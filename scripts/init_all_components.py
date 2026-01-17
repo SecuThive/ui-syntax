@@ -99,15 +99,15 @@ def publish_design(design_id: str):
 
 def main():
     """Generate initial design for all components"""
-    print("🎨 Generating initial designs for all components...\n")
+    print("[*] Generating initial designs for all components...\n")
     created = []
     
     for category, variant, base_name in COMPONENT_POOL:
-        print(f"🎨 Generating: {base_name}...", end=" ")
+        print(f"[+] Generating: {base_name}...", end=" ")
         try:
             design_name, code = generate_code_with_ollama(category, variant)
             if not code:
-                print(f"⚠️  Skipped: empty code")
+                print(f"[!] Skipped: empty code")
                 continue
             
             timestamp = datetime.now(UTC)
@@ -118,7 +118,7 @@ def main():
             
             payload = {
                 "title": title,
-                "description": f"✨ Initial design for {category}/{variant}",
+                "description": f"Initial design for {category}/{variant}",
                 "category": category,
                 "variant": variant,
                 "code": code,
@@ -131,16 +131,16 @@ def main():
             design_id = res.get("design", {}).get("id")
             if design_id:
                 pub_res = publish_design(design_id)
-                print(f"✅ Created & Published")
+                print(f"[OK] Created & Published")
                 created.append(res)
             else:
-                print("⚠️  Created but no ID")
+                print("[!] Created but no ID")
                 created.append(res)
                 
         except Exception as e:
-            print(f"❌ Error: {e}")
+            print(f"[ERROR] {e}")
     
-    print(f"\n🎉 Initialization complete! Created {len(created)} designs.")
+    print(f"\n[SUCCESS] Created {len(created)} designs.")
     return created
 
 if __name__ == "__main__":

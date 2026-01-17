@@ -18,6 +18,7 @@ export default function ComponentPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 디자인 선택 시 코드 fetch
   useEffect(() => {
     const fetchCode = async () => {
       setLoading(true);
@@ -53,6 +54,18 @@ export default function ComponentPage() {
     fetchCode();
   }, [designId, category, variant]);
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-zinc-50 p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="p-6 rounded-lg border border-red-800 bg-red-950/30 text-red-400">
+            Error: {error}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50">
       <div className="max-w-6xl mx-auto w-full px-6 py-12 md:px-8 md:py-16">
@@ -83,8 +96,6 @@ export default function ComponentPage() {
           <div className="p-12 rounded-lg border border-zinc-800 bg-zinc-900 min-h-96 overflow-auto max-h-[500px] flex items-center justify-center">
             {loading ? (
               <p className="text-zinc-500">Loading preview...</p>
-            ) : error ? (
-              <p className="text-red-400">Error: {error}</p>
             ) : codeContent ? (
               <PreviewComponent code={codeContent} />
             ) : (
