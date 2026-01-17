@@ -46,20 +46,20 @@ export async function POST(request: NextRequest) {
   <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"><\/script>
   <script src="https://cdn.tailwindcss.com"><\/script>
   <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
-    body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: white; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
+    html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+    body { display: flex; justify-content: center; align-items: flex-start; padding: 40px 20px; background: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
+    #root { display: flex; justify-content: center; align-items: center; }
   </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="text/babel">
 (function renderComponent() {
-  // srcDoc에서는 DOMContentLoaded가 안 됨. 직접 실행
   const React = window.React;
   const ReactDOM = window.ReactDOM;
   
   if (!React || !ReactDOM) {
-    document.body.innerHTML = '<div style="color: red; padding: 20px; background: #ffe6e6; border-radius: 4px;">Error: React libraries not loaded</div>';
+    document.body.innerHTML = '<div style="color: #ff6b6b; padding: 20px; background: #2a2a2a; border-radius: 4px;">Error: React libraries not loaded</div>';
     return;
   }
   
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     root.render(<Component />);
   } catch (e) {
     const errorMsg = e instanceof Error ? e.message : String(e);
-    document.body.innerHTML = '<div style="color: #d32f2f; padding: 20px; background: #ffebee; border-radius: 4px; border-left: 4px solid #d32f2f; font-family: monospace; white-space: pre-wrap;"><strong>Render Error:</strong><br>' + errorMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+    document.body.innerHTML = '<div style="color: #ff6b6b; padding: 20px; background: #2a2a2a; border-radius: 4px; border-left: 4px solid #ff6b6b; font-family: monospace; white-space: pre-wrap; max-width: 600px;"><strong>Render Error:</strong><br>' + errorMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
     console.error('Component render error:', e);
   }
 })();

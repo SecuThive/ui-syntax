@@ -109,8 +109,8 @@ function ComponentPreviewRenderer({ code }: { code: string }) {
   return (
     <iframe
       srcDoc={iframeHtml}
-      className="w-full border border-zinc-700 rounded-lg bg-white"
-      style={{ minHeight: '400px' }}
+      className="w-full border border-zinc-700 rounded-lg"
+      style={{ minHeight: '500px', background: '#0a0a0a' }}
       sandbox="allow-scripts allow-same-origin allow-popups"
     />
   );
