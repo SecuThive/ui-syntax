@@ -1,6 +1,6 @@
 import os
 import requests
-from datetime import datetime
+from datetime import datetime, UTC
 
 try:
     import google.generativeai as genai
@@ -21,9 +21,9 @@ genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel(MODEL_NAME)
 
 TARGETS = [
-    ("button", "outlined", "Button Outlined " + datetime.utcnow().strftime("%Y%m%d")),
-    ("card", "compact", "Card Compact " + datetime.utcnow().strftime("%Y%m%d")),
-    ("input", "search", "Input Search " + datetime.utcnow().strftime("%Y%m%d")),
+    ("button", "outlined", "Button Outlined " + datetime.now(UTC).strftime("%Y%m%d")),
+    ("card", "compact", "Card Compact " + datetime.now(UTC).strftime("%Y%m%d")),
+    ("input", "search", "Input Search " + datetime.now(UTC).strftime("%Y%m%d")),
 ]
 
 PROMPT_TEMPLATE = """
@@ -57,7 +57,7 @@ def run_daily():
             continue
         payload = {
             "title": title,
-            "description": f"Auto-generated {category}/{variant} via Gemini on {datetime.utcnow().isoformat()}",
+            "description": f"Auto-generated {category}/{variant} via Gemini on {datetime.now(UTC).isoformat()}",
             "category": category,
             "variant": variant,
             "code": code,
