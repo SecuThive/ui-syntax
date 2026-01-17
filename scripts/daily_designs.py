@@ -9,7 +9,7 @@ except ImportError:
 
 API_BASE = os.environ.get("API_BASE")
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
-MODEL_NAME = os.environ.get("GEMINI_MODEL", "gemini-1.5-pro")
+MODEL_NAME = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash-exp")
 
 if not API_BASE:
     raise SystemExit("Missing env: API_BASE (e.g., https://your-app.vercel.app)")
