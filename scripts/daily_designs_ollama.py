@@ -6,7 +6,7 @@ from datetime import datetime, UTC
 
 API_BASE = os.environ.get("API_BASE", "https://ui-syntax.vercel.app")
 OLLAMA_BASE = os.environ.get("OLLAMA_BASE", "http://localhost:11434")
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "neural-chat")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama2")
 
 if not API_BASE:
     raise SystemExit("Missing env: API_BASE")
