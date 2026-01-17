@@ -69,13 +69,12 @@ export default function PreviewComponent({ category, variant }: PreviewProps) {
 function ComponentPreviewRenderer({ code }: { code: string }) {
   const [iframeHtml, setIframeHtml] = useState<string>('');
   const [renderError, setRenderError] = useState<string | null>(null);
-  const [iframeHeight, setIframeHeight] = useState<number>(200);
+  const [iframeHeight, setIframeHeight] = useState<number>(150);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'resize' && event.data?.height) {
-        // 최소 높이 200px
-        setIframeHeight(Math.max(event.data.height, 200));
+        setIframeHeight(Math.max(event.data.height, 150));
       }
     };
 
@@ -123,7 +122,13 @@ function ComponentPreviewRenderer({ code }: { code: string }) {
     <iframe
       srcDoc={iframeHtml}
       className="w-full rounded-lg"
-      style={{ height: `${iframeHeight}px`, background: '#0a0a0a', border: '1px solid #333', transition: 'height 0.2s ease' }}
+      style={{ 
+        height: `${iframeHeight}px`, 
+        background: '#0a0a0a', 
+        border: '1px solid #333', 
+        transition: 'height 0.2s ease',
+        overflow: 'hidden'
+      }}
       sandbox="allow-scripts allow-same-origin allow-popups"
     />
   );

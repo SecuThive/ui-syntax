@@ -46,24 +46,25 @@ export async function POST(request: NextRequest) {
   <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"><\/script>
   <script src="https://cdn.tailwindcss.com"><\/script>
   <style>
-    html, body { margin: 0; padding: 0; width: 100%; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { 
+      width: 100%; 
+      height: auto;
+      overflow: hidden;
+      background: transparent;
+    }
     body { 
       display: flex; 
       justify-content: center; 
       align-items: center; 
-      padding: 0; 
-      background: transparent; 
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-      min-height: 200px;
+      padding: 24px;
     }
     #root { 
-      display: flex; 
+      display: inline-flex; 
       justify-content: center; 
       align-items: center;
-      width: 100%;
-      padding: 16px;
     }
-    * { box-sizing: border-box; }
   </style>
 </head>
 <body>
@@ -91,21 +92,18 @@ export async function POST(request: NextRequest) {
     // 높이 자동 조정을 위해 ResizeObserver 설정
     setTimeout(() => {
       const getContentHeight = () => {
-        const root = document.getElementById('root');
-        if (!root) return 200;
-        const height = root.getBoundingClientRect().height;
-        return Math.max(Math.ceil(height), 200);
+        const body = document.body;
+        return Math.max(body.scrollHeight, 150);
       };
       
       const observer = new ResizeObserver(() => {
-        const height = getContentHeight();
-        window.parent.postMessage({ type: 'resize', height }, '*');
+        window.parent.postMessage({ type: 'resize', height: getContentHeight() }, '*');
       });
-      observer.observe(document.getElementById('root'));
+      observer.observe(document.body);
       
       // 초기 높이 전송
       window.parent.postMessage({ type: 'resize', height: getContentHeight() }, '*');
-    }, 150);
+    }, 200);
   } catch (e) {
     const errorMsg = e instanceof Error ? e.message : String(e);
     document.body.innerHTML = '<div style="color: #ff6b6b; padding: 20px; background: #2a2a2a; border-radius: 4px; border-left: 4px solid #ff6b6b; font-family: monospace; white-space: pre-wrap; max-width: 600px;"><strong>Render Error:</strong><br>' + errorMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
