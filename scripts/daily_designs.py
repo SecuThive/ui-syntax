@@ -48,6 +48,14 @@ def post_design(payload: dict):
     return r.json()
 
 
+def publish_design(design_id: str):
+    """Publish a draft design to make it live"""
+    url = f"{API_BASE}/api/designs/{design_id}/publish"
+    r = requests.post(url, timeout=30)
+    r.raise_for_status()
+    return r.json()
+
+
 def run_daily():
     created = []
     for category, variant, title in TARGETS:
@@ -68,7 +76,20 @@ def run_daily():
         try:
             res = post_design(payload)
             print("Created:", res)
-            created.append(res)
+            
+            # Auto-publish the design
+            design_id = res.get("design", {}).get("id")
+            if design_id:
+                try:
+                    pub_res = publish_design(design_id)
+                    print("Published:", pub_res)
+                    created.append(pub_res)
+                except Exception as e:
+                    print(f"Warning: Created but failed to publish {design_id}: {e}")
+                    created.append(res)
+            else:
+                print("Warning: No design ID returned, skipping publish")
+                created.append(res)
         except Exception as e:
             print("Error posting design:", e)
     return created
