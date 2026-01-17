@@ -1,120 +1,110 @@
-'use client';
-
-import { useParams, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { getComponentBySlug, getAllComponents } from '@/lib/mdx';
+import { getLatestPublishedDesignCode } from '@/lib/designs';
+import { notFound } from 'next/navigation';
 import ComponentPageClient from './page-client';
-import PreviewComponent from './preview-dynamic';
+import React from 'react';
+import PreviewComponent from './preview-simple';
 import DesignSelector from '@/components/DesignSelector';
 
-export default function ComponentPage() {
-  const params = useParams();
-  const searchParams = useSearchParams();
-  
-  const category = params.category as string;
-  const variant = params.variant as string;
-  const designId = searchParams.get('design');
+interface ComponentPageProps {
+  params: Promise<{
+    category: string;
+    variant: string;
+  }>;
+  searchParams: Promise<{
+    design?: string;
+  }>;
+}
 
-  const [codeContent, setCodeContent] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchCode = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        let code = null;
-        
-        if (designId) {
-          // 특정 디자인 ID로 fetch
-          const response = await fetch(`/api/designs/${designId}`);
-          if (response.ok) {
-            const data = await response.json();
-            code = data.design?.code;
-          }
-        } else {
-          // 최신 published 디자인 fetch
-          const response = await fetch(`/api/designs?category=${category}&variant=${variant}&status=published`);
-          if (response.ok) {
-            const data = await response.json();
-            const designs = data.designs || [];
-            if (designs.length > 0) {
-              code = designs[0].code;
-            }
-          }
-        }
-        
-        if (!code) {
-          throw new Error('No code available');
-        }
-        
-        setCodeContent(code);
-      } catch (err) {
-        console.error('Error fetching code:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
-        setCodeContent(null);
-      } finally {
-        setLoading(false);
-      }
+export async function generateStaticParams() {
+  const components = await getAllComponents();
+  return components.map((component) => {
+    const parts = component.slug.split('/');
+    return {
+      category: parts[0],
+      variant: parts[1],
     };
+  });
+}
 
-    fetchCode();
-  }, [designId, category, variant]);
+export async function generateMetadata({ params }: ComponentPageProps) {
+  const { category, variant } = await params;
+  const component = await getComponentBySlug(`${category}/${variant}`);
+
+  if (!component) {
+    return {
+      title: 'Not Found',
+    };
+  }
+
+  return {
+    title: `${component.metadata.title} - UI Syntax`,
+    description: component.metadata.description,
+  };
+}
+
+function extractCode(content: string): string {
+  const match = content.match(/```(?:[\w-]+)?\s+([\s\S]*?)```/);
+  return match ? match[1].trim() : '// No code available';
+}
+
+export default async function ComponentPage({ params, searchParams }: ComponentPageProps) {
+  const { category, variant } = await params;
+  const { design: designId } = await searchParams;
+  const component = await getComponentBySlug(`${category}/${variant}`);
+
+  if (!component) {
+    notFound();
+  }
+
+  // 1) Get code from database
+  let codeContent = await getLatestPublishedDesignCode(category, variant);
+  
+  // 2) Fallback to MDX metadata or content
+  if (!codeContent) {
+    codeContent = component.metadata.code 
+      ? (component.metadata.code as string) 
+      : extractCode(component.content);
+  }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50">
-      <div className="max-w-6xl mx-auto w-full px-6 py-12 md:px-8 md:py-16">
-        {/* Breadcrumb */}
-        <div className="flex gap-2 text-sm mb-8 text-zinc-500">
-          <span className="text-zinc-400">Components</span>
-          <span>/</span>
-          <span className="text-zinc-300 capitalize">{category}</span>
-          <span>/</span>
-          <span className="text-zinc-300 capitalize">{variant}</span>
-        </div>
+    <div className="space-y-12">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-sm text-zinc-400 pt-4">
+        <a href="/" className="hover:text-zinc-300 transition-colors">Home</a>
+        <span>/</span>
+        <a href="/docs" className="hover:text-zinc-300 transition-colors">Docs</a>
+        <span>/</span>
+        <a href={`/docs/${category}`} className="hover:text-zinc-300 transition-colors capitalize">
+          {category}
+        </a>
+        <span>/</span>
+        <span className="text-zinc-300 capitalize">{variant}</span>
+      </div>
 
-        {/* Header with Design Selector */}
-        <div className="space-y-3 mb-12">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <h1 className="text-5xl font-bold text-zinc-50 capitalize">
-                {category} - {variant}
-              </h1>
-            </div>
-            <DesignSelector category={category} variant={variant} />
-          </div>
-        </div>
-
-        {/* Live Preview Section */}
-        <div className="space-y-4 mb-12">
-          <h2 className="text-2xl font-bold text-zinc-50">Preview</h2>
-          <div className="p-12 rounded-lg border border-zinc-800 bg-zinc-900 min-h-96 overflow-auto max-h-[500px] flex items-center justify-center">
-            {loading ? (
-              <p className="text-zinc-500">Loading preview...</p>
-            ) : error ? (
-              <p className="text-red-400">Error: {error}</p>
-            ) : codeContent ? (
-              <PreviewComponent code={codeContent} />
-            ) : (
-              <p className="text-zinc-500">No code available</p>
+      {/* Header */}
+      <div className="space-y-3">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-5xl font-bold text-zinc-50">{component.metadata.title}</h1>
+            {component.metadata.description && (
+              <p className="text-lg text-zinc-400 max-w-2xl mt-3">{component.metadata.description}</p>
             )}
           </div>
+          <DesignSelector category={category} variant={variant} />
         </div>
-
-        {/* Code Section */}
-        {loading ? (
-          <div className="p-6 rounded-lg border border-zinc-800 bg-zinc-900/30">
-            <p className="text-zinc-500">Loading code...</p>
-          </div>
-        ) : codeContent ? (
-          <ComponentPageClient content="" code={codeContent} />
-        ) : (
-          <div className="p-6 rounded-lg border border-zinc-800 bg-zinc-900/30">
-            <p className="text-zinc-500">No code available</p>
-          </div>
-        )}
       </div>
+
+      {/* Live Preview Section */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-zinc-50">Preview</h2>
+        <div className="p-12 rounded-lg border border-zinc-800 bg-zinc-950 min-h-96 overflow-auto max-h-[500px] flex items-center justify-center">
+          <PreviewComponent category={category} variant={variant} />
+        </div>
+      </div>
+
+      {/* Code Section */}
+      <ComponentPageClient content={component.content} code={codeContent} />
     </div>
   );
 }
