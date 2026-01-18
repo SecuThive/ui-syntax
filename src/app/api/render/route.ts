@@ -1,8 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
-    const { code } = await req.json();
+    console.log('[Render API] Request received');
+    
+    const body = await req.json();
+    const { code } = body;
+
+    if (!code || typeof code !== 'string') {
+      console.warn('[Render API] Invalid or missing code');
+      return NextResponse.json(
+        { error: 'Invalid code parameter' },
+        { status: 400 }
+      );
+    }
+
+    console.log('[Render API] Processing code, length:', code.length);
 
     // 코드 정리
     let cleaned = code
@@ -77,10 +92,19 @@ export async function POST(req: NextRequest) {
 </body>
 </html>`;
 
+    console.log('[Render API] HTML generated successfully');
     return NextResponse.json({ html });
   } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error('[Render API ERROR]:', errorMessage);
+    console.error('[Render API ERROR Stack]:', err instanceof Error ? err.stack : 'N/A');
+    
     return NextResponse.json(
-      { error: String(err) },
+      {
+        error: 'Failed to render component',
+        message: errorMessage,
+        timestamp: new Date().toISOString(),
+      },
       { status: 500 }
     );
   }

@@ -24,11 +24,11 @@ const CATEGORIES = {
   modal: ['basic', 'confirm']
 };
 
-export default function ComponentDetailPage({ 
-  params 
-}: { 
-  params: { category: string; name: string } 
-}) {
+interface PageProps {
+  params: { category: string; name: string };
+}
+
+export default function ComponentDetailPage({ params }: PageProps) {
   const { category, name } = params;
   const [component, setComponent] = useState<Component | null>(null);
   const [html, setHtml] = useState('');
@@ -37,20 +37,66 @@ export default function ComponentDetailPage({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/components/${category}/${name}`)
-      .then(r => r.json()).then(setComponent).catch(e => console.error(e));
+    if (!category || !name) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchComponent = async () => {
+      try {
+        const res = await fetch(`/api/components/${category}/${name}`);
+        if (!res.ok) {
+          console.warn(`[Page] API returned ${res.status}`);
+          setComponent(null);
+          setLoading(false);
+          return;
+        }
+        const data = await res.json();
+        setComponent(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('[Page] Fetch failed:', error);
+        setComponent(null);
+        setLoading(false);
+      }
+    };
+
+    fetchComponent();
   }, [category, name]);
 
   useEffect(() => {
-    if (!component?.code) return;
-    fetch('/api/render', { 
-      method: 'POST', 
-      body: JSON.stringify({ code: component.code }), 
-      headers: { 'Content-Type': 'application/json' } 
-    })
-      .then(r => r.json())
-      .then(d => { setHtml(d.html); setLoading(false); })
-      .catch(e => { console.error(e); setLoading(false); });
+    if (!component?.code) {
+      setHtml('');
+      setLoading(false);
+      return;
+    }
+
+    const renderPreview = async () => {
+      try {
+        const res = await fetch('/api/render', {
+          method: 'POST',
+          body: JSON.stringify({ code: component.code }),
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!res.ok) {
+          console.error(`[Page] Render API returned ${res.status}`);
+          setHtml('');
+          setLoading(false);
+          return;
+        }
+
+        const data = await res.json();
+        setHtml(data.html || '');
+        setLoading(false);
+      } catch (error) {
+        console.error('[Page] Render failed:', error);
+        setHtml('');
+        setLoading(false);
+      }
+    };
+
+    renderPreview();
   }, [component]);
 
   useEffect(() => {

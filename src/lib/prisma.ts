@@ -7,9 +7,12 @@ declare global {
 let prisma: PrismaClient;
 
 const prismaClientSingleton = () => {
-  const datasourceUrl = process.env.DATABASE_URL ?? 'file:./prisma/dev.db';
+  const datasourceUrl = process.env.DATABASE_URL || 'file:./prisma/dev.db';
+  
+  console.log(`[Prisma] Initializing with datasourceUrl: ${datasourceUrl === 'file:./prisma/dev.db' ? 'DEFAULT (dev.db)' : 'CUSTOM'}`);
+  
   return new PrismaClient({
-    log: ['error', 'warn'],
+    log: process.env.NODE_ENV === 'production' ? ['error'] : ['error', 'warn'],
     datasourceUrl,
   });
 };
