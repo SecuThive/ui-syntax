@@ -3,6 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+// Ensure dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface Component {
   id?: string;
   category: string;
