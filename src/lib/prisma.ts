@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import path from 'path';
+import fs from 'fs';
 
 declare global {
   var prisma: PrismaClient | undefined;
@@ -7,13 +9,21 @@ declare global {
 let prisma: PrismaClient;
 
 const prismaClientSingleton = () => {
-  const datasourceUrl = process.env.DATABASE_URL || 'file:./prisma/dev.db';
+  console.log(`[Prisma] Initializing client, NODE_ENV: ${process.env.NODE_ENV}`);
   
-  console.log(`[Prisma] Initializing with datasourceUrl: ${datasourceUrl === 'file:./prisma/dev.db' ? 'DEFAULT (dev.db)' : 'CUSTOM'}`);
+  // DATABASE_URL 확인
+  const databaseUrl = process.env.DATABASE_URL;
+  console.log(`[Prisma] DATABASE_URL set: ${!!databaseUrl}`);
+  
+  // 개발 환경에서 DB 파일 존재 여부 확인
+  if (process.env.NODE_ENV !== 'production') {
+    const dbPath = path.join(process.cwd(), 'prisma', 'dev.db');
+    const dbExists = fs.existsSync(dbPath);
+    console.log(`[Prisma] Dev DB path: ${dbPath}, exists: ${dbExists}`);
+  }
   
   return new PrismaClient({
     log: process.env.NODE_ENV === 'production' ? ['error'] : ['error', 'warn'],
-    datasourceUrl,
   });
 };
 
