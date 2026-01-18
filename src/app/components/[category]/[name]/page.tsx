@@ -12,7 +12,11 @@ const CATEGORIES = {
   modal: ['basic', 'confirm']
 };
 
-export default function ComponentDetailPage({ params }) {
+export default function ComponentDetailPage({ 
+  params 
+}: { 
+  params: Promise<{ category: string; name: string }> 
+}) {
   const { category, name } = React.use(params);
   const [component, setComponent] = useState(null);
   const [html, setHtml] = useState('');
