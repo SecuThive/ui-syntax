@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 46, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/PC/photopolio/ui-syntax/src/app/api/simple/%5Bslug%5D/route.ts"],"sourcesContent":["import { NextRequest, NextResponse } from 'next/server';\r\n\r\nexport async function GET(\r\n  req: NextRequest,\r\n  { params }: { params: Promise<{ slug: string }> }\r\n) {\r\n  const { slug } = await params;\r\n  return NextResponse.json({ slug });\r\n}\r\n"],"names":[],"mappings":";;;;AAAA;;AAEO,eAAe,IACpB,GAAgB,EAChB,EAAE,MAAM,EAAyC;IAEjD,MAAM,EAAE,IAAI,EAAE,GAAG,MAAM;IACvB,OAAO,gJAAY,CAAC,IAAI,CAAC;QAAE;IAAK;AAClC"}}]
-}

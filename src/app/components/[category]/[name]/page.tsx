@@ -3,6 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+interface Component {
+  id?: string;
+  category: string;
+  name: string;
+  code: string;
+  description?: string;
+}
+
 const CATEGORIES = {
   button: ['primary', 'secondary', 'outline'],
   card: ['basic', 'elevated', 'interactive'],
@@ -18,7 +26,7 @@ export default function ComponentDetailPage({
   params: Promise<{ category: string; name: string }> 
 }) {
   const { category, name } = React.use(params);
-  const [component, setComponent] = useState(null);
+  const [component, setComponent] = useState<Component | null>(null);
   const [html, setHtml] = useState('');
   const [copied, setCopied] = useState(false);
   const [iframeHeight, setIframeHeight] = useState(400);
@@ -42,7 +50,7 @@ export default function ComponentDetailPage({
   }, [component]);
 
   useEffect(() => {
-    const handler = (e) => {
+    const handler = (e: MessageEvent) => {
       if (e.data?.type === 'resize' && e.data?.height) {
         setIframeHeight(Math.max(e.data.height + 40, 300));
       }

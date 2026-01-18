@@ -1,0 +1,9 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/components/[category]/[name]/route": "app/api/components/[category]/[name]/route.js",
+  "/api/render/route": "app/api/render/route.js",
+  "/components/[category]/[name]/page": "app/components/[category]/[name]/page.js",
+  "/components/page": "app/components/page.js",
+  "/page": "app/page.js"
+}

@@ -1,0 +1,9 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/components/[category]/[name]/route": "/api/components/[category]/[name]",
+  "/api/render/route": "/api/render",
+  "/components/[category]/[name]/page": "/components/[category]/[name]",
+  "/components/page": "/components",
+  "/page": "/"
+}

@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 46, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/PC/photopolio/ui-syntax/src/app/api/nested/%5Bcat%5D/%5Bitem%5D/route.ts"],"sourcesContent":["import { NextRequest, NextResponse } from 'next/server';\r\n\r\nexport async function GET(\r\n  req: NextRequest,\r\n  { params }: { params: Promise<{ cat: string; item: string }> }\r\n) {\r\n  const { cat, item } = await params;\r\n  return NextResponse.json({ cat, item });\r\n}\r\n"],"names":[],"mappings":";;;;AAAA;;AAEO,eAAe,IACpB,GAAgB,EAChB,EAAE,MAAM,EAAsD;IAE9D,MAAM,EAAE,GAAG,EAAE,IAAI,EAAE,GAAG,MAAM;IAC5B,OAAO,gJAAY,CAAC,IAAI,CAAC;QAAE;QAAK;IAAK;AACvC"}}]
-}
