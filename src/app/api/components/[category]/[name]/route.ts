@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ category: string; name: string }> }
@@ -21,7 +23,12 @@ export async function GET(
 
     return NextResponse.json(component);
   } catch (error) {
-    console.error('Error fetching component:', error);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Error fetching component:', errorMessage);
+    console.error('Full error:', error);
+    return NextResponse.json(
+      { error: 'Internal error', details: errorMessage },
+      { status: 500 }
+    );
   }
 }

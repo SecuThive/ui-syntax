@@ -6,11 +6,17 @@ declare global {
 
 let prisma: PrismaClient;
 
+const prismaClientSingleton = () => {
+  return new PrismaClient({
+    log: ['error', 'warn'],
+  });
+};
+
 if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient();
+  prisma = prismaClientSingleton();
 } else {
   if (!global.prisma) {
-    global.prisma = new PrismaClient();
+    global.prisma = prismaClientSingleton();
   }
   prisma = global.prisma;
 }
