@@ -27,9 +27,9 @@ const CATEGORIES = {
 export default function ComponentDetailPage({ 
   params 
 }: { 
-  params: Promise<{ category: string; name: string }> 
+  params: { category: string; name: string } 
 }) {
-  const { category, name } = React.use(params);
+  const { category, name } = params;
   const [component, setComponent] = useState<Component | null>(null);
   const [html, setHtml] = useState('');
   const [copied, setCopied] = useState(false);
